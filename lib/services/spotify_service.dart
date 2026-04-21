@@ -12,8 +12,7 @@ class SpotifyService {
     final response = await http.post(
       Uri.parse('https://accounts.spotify.com/api/token'),
       headers: {
-        'Authorization': 'Basic ' +
-            base64Encode(utf8.encode('$clientId:$clientSecret')),
+        'Authorization': 'Basic ${base64Encode(utf8.encode('$clientId:$clientSecret'))}',
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: {
@@ -76,7 +75,12 @@ Future<List<Map<String, dynamic>>> getSongsByEmotion(String emotion) async {
     return {
       "title": song['name'],
       "artist": song['artists'][0]['name'],
+      "album": song['album']['name'],
+      "year": song['album']['release_date'],
       "image": song['album']['images'][0]['url'],
+      "spotify_url": song['external_urls']['spotify'],
+      "artist_id": song['artists'][0]['id'],
+      "preview": song['preview_url'],
     };
   }).toList();
 }

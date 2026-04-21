@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'services/spotify_service.dart';
+import 'song_detail_screen.dart';
 
 // 🔥 ADD THESE IMPORTS (for ML)
 import 'package:tflite_flutter/tflite_flutter.dart';
@@ -240,6 +241,14 @@ class _EmotionScreenState extends State<EmotionScreen> {
                         ),
                         title: Text(song['title']),
                         subtitle: Text(song['artist']),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => SongDetailScreen(song: song),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),
