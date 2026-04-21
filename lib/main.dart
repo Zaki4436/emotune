@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'services/spotify_service.dart';
 import 'song_detail_screen.dart';
-
-// 🔥 ADD THESE IMPORTS (for ML)
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
@@ -62,7 +60,8 @@ class _EmotionScreenState extends State<EmotionScreen> {
   }
 
   Future<void> loadModel() async {
-    interpreter = await Interpreter.fromAsset('assets/model/emotion_model.tflite');
+    interpreter =
+        await Interpreter.fromAsset('assets/model/emotion_model.tflite');
   }
 
   // ===============================
@@ -76,9 +75,10 @@ class _EmotionScreenState extends State<EmotionScreen> {
 
     setState(() {
       _image = imageFile;
+      emotion = "Detecting...";
     });
 
-    detectFace(imageFile); // 🔥 CALL ML PIPELINE
+    await detectFace(imageFile); // 🔥 WAIT PROCESS
   }
 
   // ===============================
@@ -110,13 +110,13 @@ class _EmotionScreenState extends State<EmotionScreen> {
       height: face.height.toInt(),
     );
 
-    runModel(cropped);
+    await runModel(cropped); // 🔥 IMPORTANT
   }
 
   // ===============================
-  // 🤖 RUN MODEL
+  // 🤖 RUN MODEL + AUTO FETCH
   // ===============================
-  void runModel(img.Image image) {
+  Future<void> runModel(img.Image image) async {
     if (interpreter == null) return;
 
     img.Image resized = img.copyResize(image, width: 48, height: 48);
@@ -127,7 +127,8 @@ class _EmotionScreenState extends State<EmotionScreen> {
         48,
         (y) => List.generate(48, (x) {
           var pixel = resized.getPixel(x, y);
-          var gray = (pixel.r * 0.3 + pixel.g * 0.59 + pixel.b * 0.11) / 255.0;
+          var gray =
+              (pixel.r * 0.3 + pixel.g * 0.59 + pixel.b * 0.11) / 255.0;
           return [gray];
         }),
       ),
@@ -147,14 +148,18 @@ class _EmotionScreenState extends State<EmotionScreen> {
       }
     }
 
-    // 🔥 SET REAL EMOTION HERE
+    String detectedEmotion = labels[maxIndex];
+
     setState(() {
-      emotion = labels[maxIndex];
+      emotion = detectedEmotion;
     });
+
+    // 🔥 AUTO FETCH SONGS
+    await fetchSongs();
   }
 
   // ===============================
-  // 🎵 FETCH SONGS (BUTTON TRIGGER)
+  // 🎵 FETCH SONGS
   // ===============================
   Future<void> fetchSongs() async {
     setState(() => isLoading = true);
@@ -174,7 +179,7 @@ class _EmotionScreenState extends State<EmotionScreen> {
   }
 
   // ===============================
-  // 🎨 UI (UNCHANGED)
+  // 🎨 UI
   // ===============================
   @override
   Widget build(BuildContext context) {
@@ -197,12 +202,31 @@ class _EmotionScreenState extends State<EmotionScreen> {
 
           const SizedBox(height: 10),
 
-          ElevatedButton.icon(
-            onPressed: (emotion == "No emotion" || isLoading)
-                ? null
-                : fetchSongs,
-            icon: const Icon(Icons.music_note),
-            label: const Text("Get Songs 🎧"),
+          // 🎯 EMOTION BUTTONS
+          SizedBox(
+            height: 50,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: labels.length,
+              itemBuilder: (context, index) {
+                final emo = labels[index];
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: ChoiceChip(
+                    label: Text(emo),
+                    selected: emotion == emo,
+                    onSelected: (selected) async {
+                      setState(() {
+                        emotion = emo;
+                      });
+
+                      await fetchSongs();
+                    },
+                  ),
+                );
+              },
+            ),
           ),
 
           const SizedBox(height: 10),
@@ -245,7 +269,8 @@ class _EmotionScreenState extends State<EmotionScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => SongDetailScreen(song: song),
+                              builder: (_) =>
+                                  SongDetailScreen(song: song),
                             ),
                           );
                         },
