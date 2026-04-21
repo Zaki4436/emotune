@@ -86,6 +86,24 @@ Future<List<Map<String, dynamic>>> getSongsByEmotion(String emotion) async {
 }
 
   // ===============================
+  // GET LYRICS
+  // ===============================
+Future<String> getLyrics(String artist, String title) async {
+  final url = Uri.parse(
+    "https://api.lyrics.ovh/v1/${Uri.encodeComponent(artist)}/${Uri.encodeComponent(title)}",
+  );
+
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    return data['lyrics'] ?? "No lyrics found";
+  } else {
+    return "Lyrics not available";
+  }
+}
+
+  // ===============================
   // 🧠 EMOTION → GENRE
   // ===============================
   String buildQuery(String emotion) {
