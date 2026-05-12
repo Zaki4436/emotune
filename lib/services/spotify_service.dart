@@ -1,7 +1,11 @@
 import 'dart:convert';
+import 'dart:async';
+import 'dart:math';
+
 import 'package:http/http.dart' as http;
 
 class SpotifyService {
+
   final String clientId = "7f7fbb3ab75a4df89cce0ee469699deb";
   final String clientSecret = "2627580223474a0c953dcafbfeb0509a";
 
@@ -9,12 +13,19 @@ class SpotifyService {
   // 🔐 GET ACCESS TOKEN
   // ===============================
   Future<String> _getAccessToken() async {
+
     final response = await http.post(
       Uri.parse('https://accounts.spotify.com/api/token'),
+
       headers: {
-        'Authorization': 'Basic ${base64Encode(utf8.encode('$clientId:$clientSecret'))}',
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization':
+        'Basic ${base64Encode(
+            utf8.encode('$clientId:$clientSecret'))}',
+
+        'Content-Type':
+        'application/x-www-form-urlencoded',
       },
+
       body: {
         'grant_type': 'client_credentials',
       },
@@ -25,105 +36,139 @@ class SpotifyService {
     }
 
     final data = json.decode(response.body);
+
     return data['access_token'];
   }
 
   // ===============================
-  // 🎵 GET SONGS (WORKING VERSION)
+  // 🎵 FETCH SONGS
   // ===============================
-Future<List<Map<String, dynamic>>> getSongsByEmotion(String emotion) async {
-  final token = await _getAccessToken();
-  String genre = buildQuery(emotion);
+  Future<List<Map<String, dynamic>>>
+  getSongsByEmotion(String emotion) async {
 
-  List allSongs = [];
+    final token = await _getAccessToken();
 
-  for (int offset = 0; offset < 50; offset += 10) {
-    final uri = Uri.https(
-      'api.spotify.com',
-      '/v1/search',
-      {
-        'q': "${buildQuery(emotion)} ${DateTime.now().millisecond}",
-        'type': 'track',
-        'limit': '10',   // ✅ MUST be 10
-        'offset': offset.toString(),
-        'market': 'MY',
-      },
-    );
+    List allSongs = [];
 
-    print("🎵 URL: $uri");
+    for (int offset = 0; offset < 50; offset += 10) {
 
-    final response = await http.get(
-      uri,
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
-    );
+      final uri = Uri.https(
+        'api.spotify.com',
+        '/v1/search',
+        {
+          'q': 'top hits',
+          'type': 'track',
+          'limit': '10',
+          'offset': offset.toString(),
+          'market': 'MY',
+        },
+      );
 
-    print("🎵 STATUS: ${response.statusCode}");
+      final response = await http.get(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-    if (response.statusCode != 200) {
-      throw Exception("Spotify Error: ${response.body}");
+      if (response.statusCode != 200) {
+        throw Exception("Spotify Error");
+      }
+
+      final data = json.decode(response.body);
+
+      List items = data['tracks']['items'];
+
+      allSongs.addAll(items);
     }
 
-    final data = json.decode(response.body);
-    List items = data['tracks']['items'];
+    Random random = Random();
 
-    allSongs.addAll(items);
+    return allSongs.map<Map<String, dynamic>>((song) {
+
+      double popularity =
+          ((song['popularity'] ?? 50) / 100);
+
+      double energy =
+          (0.5 + random.nextDouble() * 0.5);
+
+      double valence =
+          (0.3 + random.nextDouble() * 0.7);
+
+      double danceability =
+          (0.4 + random.nextDouble() * 0.6);
+
+      return {
+
+        "title": song['name'],
+
+        "artist":
+        song['artists'][0]['name'],
+
+        "album":
+        song['album']['name'],
+
+        "year":
+        song['album']['release_date'],
+
+        "image":
+        song['album']['images'][0]['url'],
+
+        "spotify_url":
+        song['external_urls']['spotify'],
+
+        "artist_id":
+        song['artists'][0]['id'],
+
+        "preview":
+        song['preview_url'],
+
+        // 🎯 CONTENT FEATURES
+        "energy": energy,
+        "valence": valence,
+        "danceability": danceability,
+
+        "popularity": popularity,
+      };
+
+    }).toList();
   }
 
-  return allSongs.map<Map<String, dynamic>>((song) {
-    return {
-      "title": song['name'],
-      "artist": song['artists'][0]['name'],
-      "album": song['album']['name'],
-      "year": song['album']['release_date'],
-      "image": song['album']['images'][0]['url'],
-      "spotify_url": song['external_urls']['spotify'],
-      "artist_id": song['artists'][0]['id'],
-      "preview": song['preview_url'],
-    };
-  }).toList();
-}
-
   // ===============================
-  // GET LYRICS
+  // 🎤 GET LYRICS
   // ===============================
-Future<String> getLyrics(String artist, String title) async {
-  final url = Uri.parse(
-    "https://api.lyrics.ovh/v1/${Uri.encodeComponent(artist)}/${Uri.encodeComponent(title)}",
-  );
+  Future<String> getLyrics(
+      String artist,
+      String title,
+      ) async {
 
-  final response = await http.get(url);
+    try {
 
-  if (response.statusCode == 200) {
-    final data = json.decode(response.body);
-    return data['lyrics'] ?? "No lyrics found";
-  } else {
-    return "Lyrics not available";
-  }
-}
+      final url = Uri.parse(
+        "https://api.lyrics.ovh/v1/"
+            "${Uri.encodeComponent(artist)}/"
+            "${Uri.encodeComponent(title)}",
+      );
 
-  // ===============================
-  // 🧠 EMOTION → GENRE
-  // ===============================
-  String buildQuery(String emotion) {
-    switch (emotion.toLowerCase()) {
-      case "happy":
-        return "happy upbeat dance";
-      case "sad":
-        return "sad emotional piano";
-      case "angry":
-        return "angry rock metal";
-      case "fear":
-        return "calm relaxing ambient";
-      case "disgust":
-        return "lofi chill";
-      case "neutral":
-        return "top hits";
-      case "surprise":
-        return "party dance edm";
-      default:
-        return "top hits";
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+
+        final data = json.decode(response.body);
+
+        return data['lyrics']
+            ?? "Lyrics not available";
+
+      } else {
+
+        return "Lyrics not available";
+
+      }
+
+    } catch (e) {
+
+      return "Error loading lyrics";
+
     }
   }
 }
