@@ -1,485 +1,504 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
-import 'services/spotify_service.dart';
-import 'song_detail_screen.dart';
-
-import 'package:tflite_flutter/tflite_flutter.dart';
-
-import 'package:image/image.dart' as img;
-
-import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
-
-import 'utils/recommendation_engine.dart';
+import 'screens/search_song_screen.dart';
+import 'database/database_service.dart';
+import 'emotion/emotion_detector.dart';
+import 'models/song.dart';
+import 'recommendation/recommendation_engine.dart';
+import 'screens/songs_list_screen.dart';
 
 void main() {
-  runApp(const EmoTuneApp());
+  runApp(const MyApp());
 }
 
-class EmoTuneApp extends StatelessWidget {
-  const EmoTuneApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: EmotionScreen(),
+      title: 'Moodify',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const HomeScreen(),
     );
   }
 }
 
-class EmotionScreen extends StatefulWidget {
-  const EmotionScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<EmotionScreen> createState() =>
-      _EmotionScreenState();
+  State<HomeScreen> createState() =>
+      _HomeScreenState();
 }
 
-class _EmotionScreenState
-    extends State<EmotionScreen> {
+class _HomeScreenState
+    extends State<HomeScreen> {
 
-  File? _image;
+  // =========================
+  // SERVICES
+  // =========================
 
-  String emotion = "No emotion";
+  final DatabaseService
+      _databaseService =
+      DatabaseService();
 
-  bool isLoading = false;
+  final EmotionDetector
+      _emotionDetector =
+      EmotionDetector();
 
-  List songs = [];
+  final ImagePicker picker =
+      ImagePicker();
 
-  final picker = ImagePicker();
+  // =========================
+  // VARIABLES
+  // =========================
 
-  final SpotifyService _spotifyService =
-  SpotifyService();
+  List<Song> allSongs = [];
 
-  Interpreter? interpreter;
+  bool isLoading = true;
 
-  final List<String> labels = [
+  File? selectedImage;
 
-    "Angry",
-    "Disgust",
-    "Fear",
-    "Happy",
-    "Neutral",
-    "Sad",
-    "Surprise"
+  String detectedEmotion =
+      "No Emotion";
 
-  ];
+  String? selectedEmotion;
+
+  // =========================
+  // INIT
+  // =========================
 
   @override
   void initState() {
     super.initState();
-    loadModel();
+
+    initialize();
   }
 
-  Future<void> loadModel() async {
+  Future<void> initialize() async {
 
-    interpreter = await Interpreter.fromAsset(
-      'assets/model/emotion_model.tflite',
-    );
+    await _emotionDetector
+        .loadModel();
+
+    await loadSongs();
   }
 
-  // ===============================
-  // 📸 PICK IMAGE
-  // ===============================
-  Future<void> pickImage(
-      ImageSource source,
-      ) async {
+  // =========================
+  // LOAD SONGS
+  // =========================
 
-    final picked =
-    await picker.pickImage(source: source);
-
-    if (picked == null) return;
-
-    File imageFile = File(picked.path);
-
-    setState(() {
-
-      _image = imageFile;
-      emotion = "Detecting...";
-
-    });
-
-    await detectFace(imageFile);
-  }
-
-  // ===============================
-  // 🧠 FACE DETECTION
-  // ===============================
-  Future<void> detectFace(File file) async {
-
-    final inputImage =
-    InputImage.fromFile(file);
-
-    final faceDetector = FaceDetector(
-
-      options: FaceDetectorOptions(
-        performanceMode:
-        FaceDetectorMode.fast,
-      ),
-    );
-
-    final faces =
-    await faceDetector.processImage(
-      inputImage,
-    );
-
-    if (faces.isEmpty) {
-
-      setState(() {
-
-        emotion =
-        "No face detected ❌";
-
-      });
-
-      return;
-    }
-
-    final face =
-    faces.first.boundingBox;
-
-    img.Image? original =
-    img.decodeImage(
-      await file.readAsBytes(),
-    );
-
-    img.Image cropped = img.copyCrop(
-
-      original!,
-
-      x: face.left.toInt(),
-      y: face.top.toInt(),
-
-      width: face.width.toInt(),
-      height: face.height.toInt(),
-    );
-
-    await runModel(cropped);
-  }
-
-  // ===============================
-  // 🤖 RUN MODEL
-  // ===============================
-  Future<void> runModel(
-      img.Image image,
-      ) async {
-
-    if (interpreter == null) return;
-
-    img.Image resized =
-    img.copyResize(
-      image,
-      width: 48,
-      height: 48,
-    );
-
-    var input = List.generate(
-
-      1,
-
-          (i) => List.generate(
-
-        48,
-
-            (y) => List.generate(
-
-          48,
-
-              (x) {
-
-            var pixel =
-            resized.getPixel(x, y);
-
-            var gray =
-
-                (pixel.r * 0.3 +
-                    pixel.g * 0.59 +
-                    pixel.b * 0.11)
-
-                    / 255.0;
-
-            return [gray];
-          },
-        ),
-      ),
-    );
-
-    var output =
-    List.generate(
-      1,
-          (i) => List.filled(
-        labels.length,
-        0.0,
-      ),
-    );
-
-    interpreter!.run(input, output);
-
-    int maxIndex = 0;
-
-    double maxValue = output[0][0];
-
-    for (int i = 0;
-    i < labels.length;
-    i++) {
-
-      if (output[0][i] > maxValue) {
-
-        maxValue = output[0][i];
-
-        maxIndex = i;
-      }
-    }
-
-    String detectedEmotion =
-    labels[maxIndex];
-
-    setState(() {
-
-      emotion = detectedEmotion;
-
-    });
-
-    await fetchSongs();
-  }
-
-  // ===============================
-  // 🎵 FETCH SONGS
-  // ===============================
-  Future<void> fetchSongs() async {
-
-    setState(() {
-
-      isLoading = true;
-
-    });
+  Future<void> loadSongs() async {
 
     try {
 
-      var fetchedSongs =
-      await _spotifyService
-          .getSongsByEmotion(emotion);
-
-      // 🎯 CONTENT-BASED FILTERING
-      for (var song in fetchedSongs) {
-
-        song['score'] =
-            RecommendationEngine
-                .calculateScore(
-              song,
-              emotion,
-            );
-      }
-
-      // 🎯 SORT BY BEST MATCH
-      fetchedSongs.sort(
-
-            (a, b) =>
-
-            b['score']
-                .compareTo(a['score']),
-      );
+      allSongs =
+          await _databaseService
+              .getSongs();
 
       setState(() {
-
-        songs = fetchedSongs;
-
         isLoading = false;
-
       });
 
     } catch (e) {
 
-      print("Error: $e");
+      print(
+          "LOAD SONG ERROR: $e");
 
       setState(() {
-
         isLoading = false;
-
       });
     }
   }
 
-  // ===============================
-  // 🎨 UI
-  // ===============================
+  // =========================
+  // CAMERA
+  // =========================
+
+  Future<void> captureImage() async {
+
+    final pickedFile =
+        await picker.pickImage(
+      source:
+      ImageSource.camera,
+    );
+
+    if (pickedFile == null) {
+      return;
+    }
+
+    File imageFile =
+        File(pickedFile.path);
+
+    setState(() {
+      selectedImage =
+          imageFile;
+    });
+
+    String emotion =
+        await _emotionDetector
+            .predictEmotion(
+      imageFile,
+    );
+
+    if (emotion ==
+        "No Face") {
+
+      if (mounted) {
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(
+
+          const SnackBar(
+            content: Text(
+              "No face detected",
+            ),
+          ),
+        );
+      }
+
+      return;
+    }
+
+    setState(() {
+
+      detectedEmotion =
+          emotion;
+
+      selectedEmotion =
+          emotion;
+    });
+
+    final recommendedSongs =
+        RecommendationEngine
+            .recommendSongs(
+      emotion,
+      allSongs,
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SongsListScreen(
+          recommendedSongs: recommendedSongs,
+          emotion: emotion,
+        ),
+      ),
+    );
+  }
+
+  // =========================
+  // GALLERY
+  // =========================
+
+  Future<void> pickImage() async {
+
+    final pickedFile =
+        await picker.pickImage(
+      source:
+      ImageSource.gallery,
+    );
+
+    if (pickedFile == null) {
+      return;
+    }
+
+    File imageFile =
+        File(pickedFile.path);
+
+    setState(() {
+      selectedImage =
+          imageFile;
+    });
+
+    String emotion =
+        await _emotionDetector
+            .predictEmotion(
+      imageFile,
+    );
+
+    if (emotion ==
+        "No Face") {
+
+      if (mounted) {
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(
+
+          const SnackBar(
+            content: Text(
+              "No face detected",
+            ),
+          ),
+        );
+      }
+
+      return;
+    }
+
+    setState(() {
+
+      detectedEmotion =
+          emotion;
+
+      selectedEmotion =
+          emotion;
+    });
+
+    final recommendedSongs =
+        RecommendationEngine
+            .recommendSongs(
+      emotion,
+      allSongs,
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SongsListScreen(
+          recommendedSongs: recommendedSongs,
+          emotion: emotion,
+        ),
+      ),
+    );
+  }
+
+  // =========================
+  // MANUAL EMOTION
+  // =========================
+
+  void updateRecommendation(
+      String emotion) {
+
+    setState(() {
+
+      selectedEmotion =
+          emotion;
+    });
+
+    final recommendedSongs =
+        RecommendationEngine
+            .recommendSongs(
+      emotion,
+      allSongs,
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SongsListScreen(
+          recommendedSongs: recommendedSongs,
+          emotion: emotion,
+        ),
+      ),
+    );
+  }
+
+  // =========================
+  // UI
+  // =========================
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+      BuildContext context) {
 
     return Scaffold(
 
       appBar: AppBar(
-        title:
-        const Text("EmoTune 🎧"),
+        title: const Text(
+          "Moodify",
+        ),
       ),
 
-      body: Column(
+      bottomNavigationBar:
+      BottomNavigationBar(
+
+        currentIndex: 0,
+
+        items: const [
+
+          BottomNavigationBarItem(
+
+            icon: Icon(
+              Icons.home,
+            ),
+
+            label: "Home",
+          ),
+
+          BottomNavigationBarItem(
+
+            icon: Icon(
+              Icons.search,
+            ),
+
+            label: "Search",
+          ),
+        ],
+
+        onTap:
+            (index) {
+
+          if (index == 1) {
+
+            Navigator.push(
+
+              context,
+
+              MaterialPageRoute(
+
+                builder:
+                    (_) =>
+                    const SearchSongScreen(),
+              ),
+            );
+          }
+        },
+      ),
+
+      body: isLoading
+
+          ? const Center(
+        child:
+        CircularProgressIndicator(),
+      )
+
+          : Column(
 
         children: [
 
-          const SizedBox(height: 20),
-
-          _image != null
-
-              ? Image.file(
-            _image!,
-            height: 200,
-          )
-
-              : const Text(
-            "No image selected",
+          const SizedBox(
+            height: 15,
           ),
 
-          const SizedBox(height: 10),
-
-          Text(
-            emotion,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight:
-              FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: 10),
+          // =====================
+          // CAMERA + GALLERY
+          // =====================
 
           Row(
 
             mainAxisAlignment:
-            MainAxisAlignment.center,
+            MainAxisAlignment
+                .center,
 
             children: [
 
-              ElevatedButton(
+              ElevatedButton.icon(
 
-                onPressed: () =>
-                    pickImage(
-                      ImageSource.gallery,
-                    ),
+                onPressed:
+                captureImage,
 
-                child:
-                const Text("Gallery"),
+                icon:
+                const Icon(
+                  Icons
+                      .camera_alt,
+                ),
+
+                label:
+                const Text(
+                  "Camera",
+                ),
               ),
 
-              const SizedBox(width: 20),
+              const SizedBox(
+                width: 10,
+              ),
 
-              ElevatedButton(
+              ElevatedButton.icon(
 
-                onPressed: () =>
-                    pickImage(
-                      ImageSource.camera,
-                    ),
+                onPressed:
+                pickImage,
 
-                child:
-                const Text("Camera"),
+                icon:
+                const Icon(
+                  Icons.photo,
+                ),
+
+                label:
+                const Text(
+                  "Gallery",
+                ),
               ),
             ],
           ),
 
-          const SizedBox(height: 20),
-
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 8.0,
-            runSpacing: 8.0,
-            children: labels.map((e) {
-              return ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    emotion = e;
-                    _image = null;
-                  });
-                  fetchSongs();
-                },
-                child: Text(e),
-              );
-            }).toList(),
+          const SizedBox(
+            height: 10,
           ),
 
-          const SizedBox(height: 20),
+          // =====================
+          // EMOTION BUTTONS
+          // =====================
 
-          Expanded(
+          const Text(
+            "Select Emotion",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
 
-            child: isLoading
+          const SizedBox(
+            height: 10,
+          ),
 
-                ? const Center(
-              child:
-              CircularProgressIndicator(),
-            )
-
-                : ListView.builder(
-
-              itemCount:
-              songs.length,
-
-              itemBuilder:
-                  (context, index) {
-
-                var song =
-                songs[index];
-
-                return Card(
-
-                  margin:
-                  const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-
-                  child: ListTile(
-
-                    leading:
-                    Image.network(
-
-                      song['image'],
-
-                      width: 50,
-
-                      errorBuilder:
-                          (_, __, ___) =>
-
-                      const Icon(
-                        Icons.music_note,
-                      ),
-                    ),
-
-                    title:
-                    Text(song['title']),
-
-                    subtitle: Column(
-
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
-
-                      children: [
-
-                        Text(song['artist']),
-                      ],
-                    ),
-
-                    onTap: () {
-
-                      Navigator.push(
-
-                        context,
-
-                        MaterialPageRoute(
-
-                          builder: (_) =>
-
-                              SongDetailScreen(
-                                song: song,
-                              ),
-                        ),
-                      );
-                    },
-                  ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+            ),
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              alignment: WrapAlignment.center,
+              children: [
+                "Happy", "Sad", "Angry", "Fear",
+                "Neutral", "Surprise", "Disgust",
+              ].map((emotion) {
+                return ElevatedButton(
+                  onPressed: () => updateRecommendation(emotion),
+                  child: Text(emotion),
                 );
-              },
+              }).toList(),
+            ),
+          ),
+
+          const SizedBox(
+            height: 20,
+          ),
+
+          if (selectedImage !=
+              null)
+
+            Image.file(
+              selectedImage!,
+              height: 180,
+            ),
+
+          if (selectedImage !=
+              null)
+
+            const SizedBox(
+              height: 10,
+            ),
+
+          Text(
+
+            "Detected Emotion: "
+                "$detectedEmotion",
+
+            style:
+            const TextStyle(
+
+              fontSize: 18,
+
+              fontWeight:
+              FontWeight.bold,
             ),
           ),
         ],
