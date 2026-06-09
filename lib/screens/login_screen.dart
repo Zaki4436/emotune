@@ -36,9 +36,9 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } on FirebaseAuthException catch (e) {
-        String errorMessage = "Ralat log masuk berlaku. Sila cuba lagi.";
+        String errorMessage = "A login error occurred. Please try again.";
         if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') {
-          errorMessage = "Emel atau kata laluan tidak sah!";
+          errorMessage = "Invalid email or password!";
         }
 
         if (mounted) {
@@ -65,23 +65,26 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // Membuka paparan log masuk Google
+      // Sign out first to force the Google account picker to show every time
+      await GoogleSignIn().signOut();
+
+      // Open Google login view
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       
       if (googleUser == null) {
-        // Pengguna membatalkan (tutup) pop-up log masuk Google
+        // User cancelled (closed) the Google login pop-up
         setState(() => _isLoading = false);
         return;
       }
 
-      // Dapatkan maklumat pengesahan (token) daripada permintaan di atas
+      // Get authentication info (token) from the request above
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      // Log masuk ke dalam Firebase menggunakan token Google tersebut
+      // Log into Firebase using the Google token
       await FirebaseAuth.instance.signInWithCredential(credential);
 
       if (mounted) {
@@ -93,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Ralat Google Sign-In: $e"), backgroundColor: Colors.red),
+          SnackBar(content: Text("Google Sign-In Error: $e"), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -131,21 +134,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 const Icon(Icons.music_note, size: 80, color: Colors.blue),
                 const SizedBox(height: 20),
                 const Text(
-                  "Selamat Datang ke Emotune",
+                  "Welcome to Emotune",
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 30),
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
-                    labelText: 'Emel',
+                    labelText: 'Email',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.email),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Sila masukkan emel anda';
+                      return 'Please enter your email';
                     }
                     return null;
                   },
@@ -154,14 +157,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _passwordController,
                   decoration: const InputDecoration(
-                    labelText: 'Kata Laluan',
+                    labelText: 'Password',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.lock),
                   ),
                   obscureText: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Sila masukkan kata laluan anda';
+                      return 'Please enter your password';
                     }
                     return null;
                   },
@@ -176,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: _isLoading ? null : _login,
                     child: _isLoading
                         ? const CircularProgressIndicator()
-                        : const Text("Log Masuk", style: TextStyle(fontSize: 18)),
+                        : const Text("Login", style: TextStyle(fontSize: 18)),
                   ),
                 ),
                 const SizedBox(height: 15),
@@ -189,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     );
                   },
-                  child: const Text("Tiada akaun? Cipta Akaun"),
+                  child: const Text("Don't have an account? Create Account"),
                 ),
                 const SizedBox(height: 10),
                 const Row(
@@ -197,7 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Expanded(child: Divider()),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: Text("ATAU", style: TextStyle(color: Colors.grey)),
+                      child: Text("OR", style: TextStyle(color: Colors.grey)),
                     ),
                     Expanded(child: Divider()),
                   ],
@@ -217,7 +220,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: CircularProgressIndicator(strokeWidth: 2))
                         : const Icon(Icons.g_mobiledata, size: 30, color: Colors.red),
                     label: const Text(
-                      "Log Masuk dengan Google",
+                      "Login with Google",
                       style: TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                   ),

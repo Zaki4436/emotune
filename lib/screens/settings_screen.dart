@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../main.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'search_song_screen.dart';
 import 'login_screen.dart';
+import 'change_password_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   Future<void> _logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
+    
+    try {
+      // Sign out of Google to force the account picker on the next login
+      await GoogleSignIn().signOut();
+    } catch (e) {
+      // Ignore errors if the user didn't log in with Google
+    }
+    
     if (context.mounted) {
       Navigator.pushAndRemoveUntil(
         context,
@@ -23,16 +32,23 @@ class SettingsScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        // Padam rekod dari pangkalan data Firestore
+        // Delete record from Firestore database
         await FirebaseFirestore.instance.collection('users').doc(user.uid).delete();
         
-        // Padam akaun dari Firebase Authentication
+        // Delete account from Firebase Authentication
         await user.delete();
+        
+        try {
+          // Revoke Google Sign-In access if deleting account
+          await GoogleSignIn().disconnect();
+        } catch (e) {
+          // Ignore errors
+        }
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("Akaun berjaya dipadamkan."),
+              content: Text("Account successfully deleted."),
               backgroundColor: Colors.green,
             ),
           );
@@ -43,12 +59,12 @@ class SettingsScreen extends StatelessWidget {
           );
         }
       } on FirebaseAuthException catch (e) {
-        // Firebase memerlukan pengguna log masuk baru (recent login) untuk fungsi sensitif
+        // Firebase requires a recent login for sensitive functions
         if (e.code == 'requires-recent-login') {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text("Sila log keluar dan log masuk semula untuk memadam akaun."),
+                content: Text("Please log out and log in again to delete the account."),
                 backgroundColor: Colors.red,
               ),
             );
@@ -56,14 +72,14 @@ class SettingsScreen extends StatelessWidget {
         } else {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Ralat: ${e.message}"), backgroundColor: Colors.red),
+              SnackBar(content: Text("Error: ${e.message}"), backgroundColor: Colors.red),
             );
           }
         }
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Ralat: $e"), backgroundColor: Colors.red),
+            SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
           );
         }
       }
@@ -74,12 +90,12 @@ class SettingsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Padam Akaun"),
-        content: const Text("Adakah anda pasti ingin memadam akaun anda? Semua data akan hilang secara kekal."),
+        title: const Text("Delete Account"),
+        content: const Text("Are you sure you want to delete your account? All data will be permanently lost."),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text("Batal"),
+            child: const Text("Cancel"),
           ),
           TextButton(
             onPressed: () {
@@ -87,7 +103,7 @@ class SettingsScreen extends StatelessWidget {
               _showSecondDeleteConfirmation(context);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text("Padam"),
+            child: const Text("Delete"),
           ),
         ],
       ),
@@ -98,12 +114,12 @@ class SettingsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Pengesahan Terakhir"),
-        content: const Text("Tindakan ini TIDAK BOLEH diundur. Adakah anda benar-benar pasti ingin memadam akaun ini untuk selamanya?"),
+        title: const Text("Final Confirmation"),
+        content: const Text("This action CANNOT be undone. Are you absolutely sure you want to delete this account forever?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text("Batal"),
+            child: const Text("Cancel"),
           ),
           TextButton(
             onPressed: () {
@@ -111,7 +127,7 @@ class SettingsScreen extends StatelessWidget {
               _deleteAccount(context);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text("Ya, Padam Selamanya"),
+            child: const Text("Yes, Delete Forever"),
           ),
         ],
       ),
@@ -157,6 +173,17 @@ class SettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            ListTile(
+              leading: const Icon(Icons.lock),
+              title: const Text("Change Password"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
+                );
+              },
+            ),
+            const Divider(),
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text("Logout"),

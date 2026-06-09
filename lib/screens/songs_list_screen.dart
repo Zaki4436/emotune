@@ -41,13 +41,13 @@ class SongsListScreen extends StatelessWidget {
         ],
         onTap: (index) {
           if (index == 0) {
-            // Kembali ke skrin utama
+            // Return to home screen
             Navigator.popUntil(
               context,
               (route) => route.isFirst,
             );
           } else if (index == 1) {
-            // Pergi ke skrin carian lagu
+            // Go to song search screen
             Navigator.push(
               context,
               MaterialPageRoute(

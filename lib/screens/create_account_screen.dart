@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../main.dart'; // Digunakan untuk mengakses HomeScreen
+import '../main.dart'; // Used to access HomeScreen
 
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({super.key});
@@ -18,7 +18,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   bool _isLoading = false;
 
   Future<void> _createAccount() async {
-    // Menyemak sama ada semua validasi borang melepasi syarat
+    // Check if all form validations pass
     if (_formKey.currentState!.validate()) {
       
       setState(() {
@@ -26,14 +26,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       });
 
       try {
-        // 1. Cipta pengguna di Firebase Auth
+        // 1. Create user in Firebase Auth
         UserCredential userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
 
-        // 2. Simpan maklumat akaun tambahan di Cloud Firestore
+        // 2. Save additional account info in Cloud Firestore
         await FirebaseFirestore.instance
             .collection('users')
             .doc(userCredential.user!.uid)
@@ -45,12 +45,12 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text("Akaun berjaya dicipta!"),
+              content: Text("Account successfully created!"),
               backgroundColor: Colors.green,
             ),
           );
 
-          // Terus pergi ke HomeScreen
+          // Go straight to HomeScreen
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -58,13 +58,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
           );
         }
       } on FirebaseAuthException catch (e) {
-        String errorMessage = "Ralat berlaku. Sila cuba lagi.";
+        String errorMessage = "An error occurred. Please try again.";
         if (e.code == 'weak-password') {
-          errorMessage = "Kata laluan terlalu lemah.";
+          errorMessage = "Password is too weak.";
         } else if (e.code == 'email-already-in-use') {
-          errorMessage = "Emel ini telah pun digunakan.";
+          errorMessage = "This email is already in use.";
         } else if (e.code == 'invalid-email') {
-          errorMessage = "Format emel tidak sah.";
+          errorMessage = "Invalid email format.";
         }
 
         if (mounted) {
@@ -79,7 +79,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text("Ralat Firestore/Sistem: ${e.toString()}"),
+              content: Text("Firestore/System Error: ${e.toString()}"),
               backgroundColor: Colors.red,
             ),
           );
@@ -106,7 +106,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Cipta Akaun Baru"),
+        title: const Text("Create New Account"),
         centerTitle: true,
       ),
       body: Padding(
@@ -123,17 +123,17 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
-                    labelText: 'Emel',
+                    labelText: 'Email',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.email),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Sila masukkan emel anda';
+                      return 'Please enter your email';
                     }
                     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                      return 'Sila masukkan format emel yang sah (cth: ali@gmail.com)';
+                      return 'Please enter a valid email format (e.g., ali@gmail.com)';
                     }
                     return null;
                   },
@@ -142,17 +142,17 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 TextFormField(
                   controller: _passwordController,
                   decoration: const InputDecoration(
-                    labelText: 'Kata Laluan',
+                    labelText: 'Password',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.lock),
                   ),
                   obscureText: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Sila masukkan kata laluan';
+                      return 'Please enter a password';
                     }
                     if (value.length < 6) {
-                      return 'Kata laluan mestilah sekurang-kurangnya 6 aksara';
+                      return 'Password must be at least 6 characters';
                     }
                     return null;
                   },
@@ -161,18 +161,18 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 TextFormField(
                   controller: _confirmPasswordController,
                   decoration: const InputDecoration(
-                    labelText: 'Sahkan Kata Laluan',
+                    labelText: 'Confirm Password',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.lock_outline),
                   ),
                   obscureText: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Sila sahkan kata laluan anda';
+                      return 'Please confirm your password';
                     }
-                    // Semak sama ada padan dengan _passwordController
+                    // Check if it matches _passwordController
                     if (value != _passwordController.text) {
-                      return 'Kata laluan tidak sepadan!';
+                      return 'Passwords do not match!';
                     }
                     return null;
                   },
@@ -187,7 +187,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                     onPressed: _isLoading ? null : _createAccount,
                     child: _isLoading
                         ? const CircularProgressIndicator()
-                        : const Text("Daftar Akaun", style: TextStyle(fontSize: 18)),
+                        : const Text("Register Account", style: TextStyle(fontSize: 18)),
                   ),
                 ),
               ],
