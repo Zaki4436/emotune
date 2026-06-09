@@ -10,7 +10,7 @@ Map<String, Map<String, double>> emotionProfiles = {
     "liveness": 70,
     "acousticness": 20,
     "instrumentalness": 10,
-    "popularity": 80,
+    "popularity": 100,
   },
 
   "Sad": {
@@ -23,7 +23,7 @@ Map<String, Map<String, double>> emotionProfiles = {
     "liveness": 20,
     "acousticness": 80,
     "instrumentalness": 60,
-    "popularity": 60,
+    "popularity": 100,
   },
 
   "Angry": {
@@ -36,7 +36,7 @@ Map<String, Map<String, double>> emotionProfiles = {
     "liveness": 80,
     "acousticness": 10,
     "instrumentalness": 10,
-    "popularity": 70,
+    "popularity": 100,
   },
 
   "Fear": {
@@ -49,7 +49,7 @@ Map<String, Map<String, double>> emotionProfiles = {
     "liveness": 20,
     "acousticness": 80,
     "instrumentalness": 60,
-    "popularity": 50,
+    "popularity": 100,
   },
 
   "Neutral": {
@@ -62,7 +62,7 @@ Map<String, Map<String, double>> emotionProfiles = {
     "liveness": 50,
     "acousticness": 50,
     "instrumentalness": 50,
-    "popularity": 70,
+    "popularity": 100,
   },
 
   "Surprise": {
@@ -75,7 +75,7 @@ Map<String, Map<String, double>> emotionProfiles = {
     "liveness": 80,
     "acousticness": 20,
     "instrumentalness": 10,
-    "popularity": 80,
+    "popularity": 100,
   },
 
   "Disgust": {
@@ -88,6 +88,6 @@ Map<String, Map<String, double>> emotionProfiles = {
     "liveness": 10,
     "acousticness": 90,
     "instrumentalness": 80,
-    "popularity": 40,
+    "popularity": 100,
   },
 };

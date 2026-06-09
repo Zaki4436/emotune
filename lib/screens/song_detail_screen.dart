@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -232,7 +233,7 @@ class _SongDetailScreenState
 
             const Text(
 
-              "Audio Features",
+              "Emotion",
 
               style: TextStyle(
 
@@ -244,57 +245,15 @@ class _SongDetailScreenState
             ),
 
             const SizedBox(
-              height: 15,
+              height: 10,
             ),
 
-            buildFeature(
-              "Energy",
-              widget.song.energy,
-            ),
-
-            buildFeature(
-              "Danceability",
-              widget.song.danceability,
-            ),
-
-            buildFeature(
-              "Positiveness",
-              widget.song.positiveness,
-            ),
-
-            buildFeature(
-              "Tempo",
-              widget.song.tempo,
-            ),
-
-            buildFeature(
-              "Loudness",
-              widget.song.loudness,
-            ),
-
-            buildFeature(
-              "Speechiness",
-              widget.song.speechiness,
-            ),
-
-            buildFeature(
-              "Liveness",
-              widget.song.liveness,
-            ),
-
-            buildFeature(
-              "Acousticness",
-              widget.song.acousticness,
-            ),
-
-            buildFeature(
-              "Instrumentalness",
-              widget.song.instrumentalness,
-            ),
-
-            buildFeature(
-              "Popularity",
-              widget.song.popularity,
+            Text(
+              _calculateEmotion(widget.song),
+              style: const TextStyle(
+                fontSize: 18,
+                color: Colors.blue,
+              ),
             ),
 
             const SizedBox(
@@ -333,34 +292,51 @@ class _SongDetailScreenState
     );
   }
 
-  Widget buildFeature(
-      String title,
-      double value,
-      ) {
+  String _calculateEmotion(Song song) {
+    final Map<String, List<double>> emotionVectors = {
+      "Happy": [0.8, 0.8, 0.8, 0.1, 0.2, 0.1, 0.0],
+      "Sad": [0.2, 0.3, 0.2, 0.0, 0.1, 0.8, 0.1],
+      "Angry": [0.9, 0.4, 0.2, 0.2, 0.3, 0.0, 0.1],
+      "Fear": [0.3, 0.3, 0.2, 0.1, 0.2, 0.6, 0.4],
+      "Neutral": [0.5, 0.5, 0.5, 0.1, 0.2, 0.5, 0.2],
+      "Surprise": [0.7, 0.6, 0.6, 0.2, 0.3, 0.2, 0.1],
+      "Disgust": [0.4, 0.4, 0.3, 0.2, 0.2, 0.4, 0.2],
+    };
 
-    return Padding(
+    List<double> songVector = [
+      song.energy,
+      song.danceability,
+      song.positiveness,
+      song.speechiness,
+      song.liveness,
+      song.acousticness,
+      song.instrumentalness,
+    ];
 
-      padding:
-      const EdgeInsets.symmetric(
-        vertical: 4,
-      ),
+    String bestEmotion = "Unknown";
+    double maxSimilarity = -1.0;
 
-      child: Row(
+    for (var entry in emotionVectors.entries) {
+      double sim = _cosineSimilarity(songVector, entry.value);
+      if (sim > maxSimilarity) {
+        maxSimilarity = sim;
+        bestEmotion = entry.key;
+      }
+    }
 
-        mainAxisAlignment:
-        MainAxisAlignment
-            .spaceBetween,
+    return bestEmotion;
+  }
 
-        children: [
-
-          Text(title),
-
-          Text(
-            value
-                .toStringAsFixed(0),
-          ),
-        ],
-      ),
-    );
+  double _cosineSimilarity(List<double> a, List<double> b) {
+    double dotProduct = 0.0;
+    double normA = 0.0;
+    double normB = 0.0;
+    for (int i = 0; i < a.length; i++) {
+      dotProduct += a[i] * b[i];
+      normA += a[i] * a[i];
+      normB += b[i] * b[i];
+    }
+    if (normA == 0 || normB == 0) return 0.0;
+    return dotProduct / (math.sqrt(normA) * math.sqrt(normB));
   }
 }

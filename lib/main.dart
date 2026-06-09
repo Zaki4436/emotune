@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'screens/search_song_screen.dart';
@@ -7,8 +8,14 @@ import 'emotion/emotion_detector.dart';
 import 'models/song.dart';
 import 'recommendation/recommendation_engine.dart';
 import 'screens/songs_list_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/settings_screen.dart';
 
-void main() {
+Future<void> main() async{
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+
   runApp(const MyApp());
 }
 
@@ -23,7 +30,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const HomeScreen(),
+      home: const LoginScreen(),
     );
   }
 }
@@ -61,6 +68,8 @@ class _HomeScreenState
   List<Song> allSongs = [];
 
   bool isLoading = true;
+
+  bool isAnalyzing = false;
 
   File? selectedImage;
 
@@ -137,6 +146,7 @@ class _HomeScreenState
     setState(() {
       selectedImage =
           imageFile;
+      isAnalyzing = true;
     });
 
     String emotion =
@@ -144,6 +154,10 @@ class _HomeScreenState
             .predictEmotion(
       imageFile,
     );
+
+    setState(() {
+      isAnalyzing = false;
+    });
 
     if (emotion ==
         "No Face") {
@@ -214,6 +228,7 @@ class _HomeScreenState
     setState(() {
       selectedImage =
           imageFile;
+      isAnalyzing = true;
     });
 
     String emotion =
@@ -221,6 +236,10 @@ class _HomeScreenState
             .predictEmotion(
       imageFile,
     );
+
+    setState(() {
+      isAnalyzing = false;
+    });
 
     if (emotion ==
         "No Face") {
@@ -319,6 +338,8 @@ class _HomeScreenState
       bottomNavigationBar:
       BottomNavigationBar(
 
+        type: BottomNavigationBarType.fixed,
+
         currentIndex: 0,
 
         items: const [
@@ -340,6 +361,15 @@ class _HomeScreenState
 
             label: "Search",
           ),
+
+          BottomNavigationBarItem(
+
+            icon: Icon(
+              Icons.settings,
+            ),
+
+            label: "Settings",
+          ),
         ],
 
         onTap:
@@ -358,6 +388,16 @@ class _HomeScreenState
                     const SearchSongScreen(),
               ),
             );
+              } else if (index == 2) {
+
+                Navigator.push(
+
+                  context,
+
+                  MaterialPageRoute(
+                    builder: (_) => const SettingsScreen(),
+                  ),
+                );
           }
         },
       ),
@@ -487,20 +527,32 @@ class _HomeScreenState
               height: 10,
             ),
 
-          Text(
+          if (isAnalyzing)
+            const Column(
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 10),
+                Text(
+                  "Analyzing face...",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+              ],
+            )
+          else
+            Text(
+              "Detected Emotion: "
+                  "$detectedEmotion",
 
-            "Detected Emotion: "
-                "$detectedEmotion",
-
-            style:
-            const TextStyle(
-
-              fontSize: 18,
-
-              fontWeight:
-              FontWeight.bold,
+              style:
+              const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
         ],
       ),
     );

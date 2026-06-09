@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/song.dart';
 import 'search_song_screen.dart';
 import 'song_detail_screen.dart';
+import 'settings_screen.dart';
 
 class SongsListScreen extends StatelessWidget {
   final List<Map<String, dynamic>> recommendedSongs;
@@ -22,6 +23,7 @@ class SongsListScreen extends StatelessWidget {
         title: Text("Recommended: $emotion"),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         currentIndex: 0,
         items: const [
           BottomNavigationBarItem(
@@ -31,6 +33,10 @@ class SongsListScreen extends StatelessWidget {
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
             label: "Search",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: "Settings",
           ),
         ],
         onTap: (index) {
@@ -46,6 +52,13 @@ class SongsListScreen extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (_) => const SearchSongScreen(),
+              ),
+            );
+          } else if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const SettingsScreen(),
               ),
             );
           }

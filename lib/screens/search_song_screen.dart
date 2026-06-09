@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../database/database_service.dart';
 import '../models/song.dart';
 import 'song_detail_screen.dart';
+import 'settings_screen.dart';
 
 class SearchSongScreen extends StatefulWidget {
   const SearchSongScreen({super.key});
@@ -93,6 +94,8 @@ class _SearchSongScreenState
       bottomNavigationBar:
       BottomNavigationBar(
 
+        type: BottomNavigationBarType.fixed,
+
         currentIndex: 1,
 
         items: const [
@@ -114,6 +117,15 @@ class _SearchSongScreenState
 
             label: "Search",
           ),
+
+          BottomNavigationBarItem(
+
+            icon: Icon(
+              Icons.settings,
+            ),
+
+            label: "Settings",
+          ),
         ],
 
         onTap:
@@ -124,6 +136,16 @@ class _SearchSongScreenState
             Navigator.popUntil(
               context,
               (route) => route.isFirst,
+            );
+          } else if (index == 2) {
+
+            Navigator.push(
+
+              context,
+
+              MaterialPageRoute(
+                builder: (_) => const SettingsScreen(),
+              ),
             );
           }
         },
