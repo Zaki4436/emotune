@@ -87,8 +87,21 @@ class _SearchSongScreenState
 
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title:
-        const Text("Search Songs"),
+        title: const Text(
+          "Search Songs",
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue.shade800, Colors.blue.shade400],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
 
       bottomNavigationBar:
@@ -151,142 +164,108 @@ class _SearchSongScreenState
         },
       ),
 
-      body: isLoading
-
-          ? const Center(
-        child:
-        CircularProgressIndicator(),
-      )
-
-          : Column(
-
-        children: [
-
-          Padding(
-
-            padding:
-            const EdgeInsets.all(12),
-
-            child: TextField(
-
-              decoration:
-              InputDecoration(
-
-                hintText:
-                "Search song or artist",
-
-                prefixIcon:
-                const Icon(
-                  Icons.search,
-                ),
-
-                border:
-                OutlineInputBorder(
-
-                  borderRadius:
-                  BorderRadius.circular(
-                    12,
-                  ),
-                ),
-              ),
-
-              onChanged:
-              searchSong,
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue.shade50, Colors.white],
           ),
-
-          Expanded(
-
-            child:
-            filteredSongs.isEmpty
-
-                ? const Center(
-              child: Text(
-                "Search for a song or artist",
-              ),
-            )
-
-                : ListView.builder(
-
-              itemCount:
-              filteredSongs.length,
-
-              itemBuilder:
-                  (context,
-                  index) {
-
-                final song =
-                filteredSongs[
-                index];
-
-                return Card(
-
-                  margin:
-                  const EdgeInsets
-                      .symmetric(
-
-                    horizontal:
-                    12,
-
-                    vertical:
-                    5,
-                  ),
-
-                  child:
-                  ListTile(
-
-                    leading:
-                    CircleAvatar(
-
-                      child:
-                      Text(
-                        "${index + 1}",
-                      ),
-                    ),
-
-                    title:
-                    Text(
-                      song.title,
-                    ),
-
-                    subtitle:
-                    Text(
-                      "${song.artist}\n${song.genre}",
-                    ),
-
-                    isThreeLine:
-                    true,
-
-                    trailing:
-                    const Icon(
-                      Icons
-                          .arrow_forward_ios,
-                    ),
-
-                    onTap:
-                        () {
-
-                      Navigator.push(
-
-                        context,
-
-                        MaterialPageRoute(
-
-                          builder:
-                              (_) =>
-                              SongDetailScreen(
-                                song:
-                                song,
-                              ),
+        ),
+        child: isLoading
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: "Search song or artist",
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
                         ),
-                      );
-                    },
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.blue.shade400, width: 2),
+                        ),
+                        prefixIcon: Icon(Icons.search, color: Colors.blue.shade600),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      onChanged: searchSong,
+                    ),
                   ),
-                );
-              },
-            ),
-          ),
-        ],
+                  Expanded(
+                    child: filteredSongs.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.music_note, size: 64, color: Colors.blue.shade200),
+                                const SizedBox(height: 16),
+                                Text(
+                                  "Search for a song or artist",
+                                  style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            itemCount: filteredSongs.length,
+                            itemBuilder: (context, index) {
+                              final song = filteredSongs[index];
+                              return Card(
+                                elevation: 2,
+                                shadowColor: Colors.blue.withOpacity(0.1),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                margin: const EdgeInsets.symmetric(vertical: 6),
+                                child: ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  leading: CircleAvatar(
+                                    backgroundColor: Colors.blue.shade100,
+                                    foregroundColor: Colors.blue.shade900,
+                                    child: const Icon(Icons.music_note),
+                                  ),
+                                  title: Text(
+                                    song.title,
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Text(
+                                    "${song.artist}\n${song.genre}",
+                                    style: TextStyle(color: Colors.grey.shade700),
+                                  ),
+                                  isThreeLine: true,
+                                  trailing: Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: 16,
+                                    color: Colors.blue.shade300,
+                                  ),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => SongDetailScreen(song: song),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
       ),
     );
   }

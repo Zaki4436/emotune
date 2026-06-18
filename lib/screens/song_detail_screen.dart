@@ -34,17 +34,36 @@ class _SongDetailScreenState
     return Scaffold(
 
       appBar: AppBar(
-        title:
-        Text(widget.song.title),
+        title: Text(
+          widget.song.title,
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue.shade800, Colors.blue.shade400],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
 
-      body:
-      SingleChildScrollView(
-
-        padding:
-        const EdgeInsets.all(16),
-
-        child: Column(
+      body: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue.shade50, Colors.white],
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
 
           crossAxisAlignment:
           CrossAxisAlignment.center,
@@ -91,24 +110,25 @@ class _SongDetailScreenState
                     if (imageUrl !=
                         null)
 
-                      ClipRRect(
-
-                        borderRadius:
-                        BorderRadius.circular(
-                          20,
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 15,
+                              offset: Offset(0, 8),
+                            ),
+                          ],
                         ),
-
-                        child:
-                        Image.network(
-
-                          imageUrl,
-
-                          height: 250,
-
-                          width: 250,
-
-                          fit:
-                          BoxFit.cover,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.network(
+                            imageUrl,
+                            height: 250,
+                            width: 250,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       )
 
@@ -119,24 +139,14 @@ class _SongDetailScreenState
                         height: 250,
                         width: 250,
 
-                        decoration:
-                        BoxDecoration(
-
-                          color:
-                          Colors.grey,
-
-                          borderRadius:
-                          BorderRadius.circular(
-                            20,
-                          ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade100,
+                          borderRadius: BorderRadius.circular(20),
                         ),
-
-                        child:
-                        const Icon(
-
+                        child: Icon(
                           Icons.music_note,
-
                           size: 100,
+                          color: Colors.blue.shade300,
                         ),
                       ),
 
@@ -152,22 +162,19 @@ class _SongDetailScreenState
                         onPressed:
                             () async {
 
-                          await launchUrl(
-                            Uri.parse(
-                              spotifyUrl,
-                            ),
-                          );
+                          await launchUrl(Uri.parse(spotifyUrl));
                         },
-
-                        icon:
-                        const Icon(
-                          Icons.music_note,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1DB954),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          elevation: 3,
                         ),
-
-                        label:
-                        const Text(
-                          "Open in Spotify",
-                        ),
+                        icon: const Icon(Icons.play_circle_fill),
+                        label: const Text("Open in Spotify", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       ),
                   ],
                 );
@@ -179,116 +186,133 @@ class _SongDetailScreenState
             ),
 
             Text(
-
               widget.song.title,
-
-              textAlign:
-              TextAlign.center,
-
-              style:
-              const TextStyle(
-
-                fontSize: 24,
-
-                fontWeight:
-                FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(
-              height: 10,
-            ),
-
-            Text(
-              "Artist: ${widget.song.artist}",
-            ),
-
-            Text(
-              "Album: ${widget.song.album}",
-            ),
-
-            Text(
-              "Genre: ${widget.song.genre}",
-            ),
-
-            Text(
-              "Release Date: ${widget.song.releaseDate}",
-            ),
-
-            Text(
-              widget.song.explicit
-                  ? "Explicit: Yes"
-                  : "Explicit: No",
-            ),
-
-            const SizedBox(
-              height: 20,
-            ),
-
-            const Divider(),
-
-            const SizedBox(
-              height: 10,
-            ),
-
-            const Text(
-
-              "Emotion",
-
+              textAlign: TextAlign.center,
               style: TextStyle(
-
-                fontSize: 20,
-
-                fontWeight:
-                FontWeight.bold,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue.shade900,
               ),
             ),
-
-            const SizedBox(
-              height: 10,
-            ),
-
+            const SizedBox(height: 6),
             Text(
-              _calculateEmotion(widget.song),
-              style: const TextStyle(
+              widget.song.artist,
+              textAlign: TextAlign.center,
+              style: TextStyle(
                 fontSize: 18,
-                color: Colors.blue,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey.shade700,
               ),
             ),
-
-            const SizedBox(
-              height: 20,
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: Colors.blue.shade200),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.auto_awesome, color: Colors.blue.shade700),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Emotion: ${_calculateEmotion(widget.song)}",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue.shade800,
+                    ),
+                  ),
+                ],
+              ),
             ),
-
-            const Divider(),
-
-            const SizedBox(
-              height: 10,
+            const SizedBox(height: 24),
+            Card(
+              elevation: 2,
+              shadowColor: Colors.blue.withOpacity(0.1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    _buildInfoRow(Icons.album, "Album", widget.song.album),
+                    const Divider(height: 24),
+                    _buildInfoRow(Icons.category, "Genre", widget.song.genre),
+                    const Divider(height: 24),
+                    _buildInfoRow(Icons.calendar_today, "Released", widget.song.releaseDate),
+                    const Divider(height: 24),
+                    _buildInfoRow(
+                      widget.song.explicit ? Icons.explicit : Icons.check_circle_outline,
+                      "Explicit",
+                      widget.song.explicit ? "Yes" : "No",
+                    ),
+                  ],
+                ),
+              ),
             ),
-
+            const SizedBox(height: 24),
             const Text(
-
               "Lyrics",
-
               style: TextStyle(
-
-                fontSize: 20,
-
-                fontWeight:
-                FontWeight.bold,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
               ),
             ),
-
-            const SizedBox(
-              height: 10,
-            ),
-
-            Text(
-              widget.song.lyrics,
+            const SizedBox(height: 12),
+            Card(
+              elevation: 2,
+              shadowColor: Colors.blue.withOpacity(0.1),
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20.0),
+                child: Text(
+                  widget.song.lyrics.isNotEmpty ? widget.song.lyrics : "Lyrics not available.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    height: 1.6,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
+        ),
       ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String title, String value) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: Colors.blue.shade600, size: 20),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
