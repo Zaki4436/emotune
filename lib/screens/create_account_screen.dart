@@ -16,6 +16,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
 
   Future<void> _createAccount() async {
     // Check if all form validations pass
@@ -222,8 +224,17 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             borderSide: BorderSide(color: Colors.blue.shade400, width: 2),
                           ),
                           prefixIcon: Icon(Icons.lock, color: Colors.blue.shade600),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                              color: Colors.grey.shade600,
+                            ),
+                            onPressed: () {
+                              setState(() => _isPasswordVisible = !_isPasswordVisible);
+                            },
+                          ),
                         ),
-                        obscureText: true,
+                        obscureText: !_isPasswordVisible,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter a password';
@@ -254,8 +265,17 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                             borderSide: BorderSide(color: Colors.blue.shade400, width: 2),
                           ),
                           prefixIcon: Icon(Icons.lock_outline, color: Colors.blue.shade600),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                              color: Colors.grey.shade600,
+                            ),
+                            onPressed: () {
+                              setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible);
+                            },
+                          ),
                         ),
-                        obscureText: true,
+                        obscureText: !_isConfirmPasswordVisible,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please confirm your password';

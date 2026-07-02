@@ -161,6 +161,8 @@ class _HomeScreenState
       selectedImage =
           imageFile;
       isAnalyzing = true;
+      detectedEmotion =
+          "No Emotion";
     });
 
     String emotion =
@@ -173,26 +175,6 @@ class _HomeScreenState
       isAnalyzing = false;
     });
 
-    if (emotion ==
-        "No Face") {
-
-      if (mounted) {
-
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
-
-          const SnackBar(
-            content: Text(
-              "No face detected",
-            ),
-          ),
-        );
-      }
-
-      return;
-    }
-
     setState(() {
 
       detectedEmotion =
@@ -200,24 +182,9 @@ class _HomeScreenState
 
       selectedEmotion =
           emotion;
+      selectedImage =
+          imageFile;
     });
-
-    final recommendedSongs =
-        RecommendationEngine
-            .recommendSongs(
-      emotion,
-      allSongs,
-    );
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => SongsListScreen(
-          recommendedSongs: recommendedSongs,
-          emotion: emotion,
-        ),
-      ),
-    );
   }
 
   // =========================
@@ -243,6 +210,8 @@ class _HomeScreenState
       selectedImage =
           imageFile;
       isAnalyzing = true;
+      detectedEmotion =
+          "No Emotion";
     });
 
     String emotion =
@@ -257,21 +226,6 @@ class _HomeScreenState
 
     if (emotion ==
         "No Face") {
-
-      if (mounted) {
-
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
-
-          const SnackBar(
-            content: Text(
-              "No face detected",
-            ),
-          ),
-        );
-      }
-
       return;
     }
 
@@ -283,23 +237,6 @@ class _HomeScreenState
       selectedEmotion =
           emotion;
     });
-
-    final recommendedSongs =
-        RecommendationEngine
-            .recommendSongs(
-      emotion,
-      allSongs,
-    );
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => SongsListScreen(
-          recommendedSongs: recommendedSongs,
-          emotion: emotion,
-        ),
-      ),
-    );
   }
 
   // =========================
@@ -313,6 +250,8 @@ class _HomeScreenState
 
       selectedEmotion =
           emotion;
+      selectedImage =
+          null;
     });
 
     final recommendedSongs =
@@ -487,7 +426,19 @@ class _HomeScreenState
         onTap:
             (index) {
 
-          if (index == 1) {
+          if (index == 0) {
+            // Refresh the page
+            setState(
+              () {
+                isLoading = true;
+                selectedImage = null;
+                detectedEmotion = "No Emotion";
+                selectedEmotion = null;
+              },
+            );
+            loadSongs();
+          }
+          else if (index == 1) {
 
             Navigator.push(
 
@@ -657,21 +608,46 @@ class _HomeScreenState
                                   ],
                                 )
                               else
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    const Text(
-                                      "Detected Emotion: ",
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                    Text(
-                                      detectedEmotion,
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: _getEmotionColor(detectedEmotion),
+                                    RichText(
+                                      textAlign: TextAlign.center,
+                                      text: TextSpan(
+                                        style: const TextStyle(fontSize: 16, color: Colors.black),
+                                        children: [
+                                          const TextSpan(text: "Detected Emotion: "),
+                                          TextSpan(
+                                            text: detectedEmotion,
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              color: _getEmotionColor(detectedEmotion),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
+                                    const SizedBox(height: 12),
+                                    if (detectedEmotion != "No Emotion" && detectedEmotion != "No Face")
+                                      ElevatedButton(
+                                        onPressed: () {
+                                           final recommendedSongs = RecommendationEngine.recommendSongs(
+                                             detectedEmotion,
+                                             allSongs,
+                                           );
+                                           Navigator.push(
+                                             context,
+                                             MaterialPageRoute(
+                                               builder: (_) => SongsListScreen(
+                                                 recommendedSongs: recommendedSongs,
+                                                 emotion: detectedEmotion,
+                                               ),
+                                              ),
+                                           );
+                                        },
+                                        child: const Text("Get Songs"),
+                                      ),
                                   ],
                                 ),
                             ],

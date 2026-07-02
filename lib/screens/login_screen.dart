@@ -16,11 +16,14 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  String? _errorMessage;
+  bool _isPasswordVisible = false;
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
+        _errorMessage = null;
       });
 
       try {
@@ -36,19 +39,13 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } on FirebaseAuthException catch (e) {
-        String errorMessage = "A login error occurred. Please try again.";
-        if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') {
-          errorMessage = "Invalid email or password!";
+        String errorMessage = "Invalid email or password";
+        if (e.code == 'user-not-found' ||
+            e.code == 'wrong-password' ||
+            e.code == 'invalid-credential') {
+          errorMessage = "Invalid email or password";
         }
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(errorMessage),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+        setState(() => _errorMessage = errorMessage);
       } finally {
         if (mounted) {
           setState(() {
@@ -226,8 +223,19 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderSide: BorderSide(color: Colors.blue.shade400, width: 2),
                           ),
                           prefixIcon: Icon(Icons.lock, color: Colors.blue.shade600),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                              color: Colors.grey.shade600,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
+                          ),
                         ),
-                        obscureText: true,
+                        obscureText: !_isPasswordVisible,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your password';
@@ -236,6 +244,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                       ),
                       const SizedBox(height: 24),
+                      if (_errorMessage != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: Text(
+                            _errorMessage!,
+                            style: const TextStyle(
+                                color: Colors.red, fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -259,30 +277,29 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const CreateAccountScreen(),
-                            ),
-                          );
-                        },
-                        child: RichText(
-                          text: TextSpan(
-                            text: "Don't have an account? ",
-                            style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
-                            children: [
-                              TextSpan(
-                                text: "Create Account",
-                                style: TextStyle(
-                                  color: Colors.blue.shade700,
-                                  fontWeight: FontWeight.bold,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("Don't have an account?", style: TextStyle(color: Colors.grey.shade700, fontSize: 14)),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const CreateAccountScreen(),
                                 ),
+                              );
+                            },
+                            child: Text(
+                              "Create Account",
+                              style: TextStyle(
+                                color: Colors.blue.shade700,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                       const SizedBox(height: 10),
                       Row(

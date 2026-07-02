@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../models/song.dart';
 import 'search_song_screen.dart';
 import 'song_detail_screen.dart';
@@ -19,9 +18,8 @@ class SongsListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         title: Text(
-          "Recommended:  for $emotion",
+          "Songs For $emotion",
           style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         centerTitle: true,
@@ -35,48 +33,6 @@ class SongsListScreen extends StatelessWidget {
             ),
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: 0,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: "Search",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: "Settings",
-          ),
-        ],
-        onTap: (index) {
-          if (index == 0) {
-            // Return to home screen
-            Navigator.popUntil(
-              context,
-              (route) => route.isFirst,
-            );
-          } else if (index == 1) {
-            // Go to song search screen
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const SearchSongScreen(),
-              ),
-            );
-          } else if (index == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const SettingsScreen(),
-              ),
-            );
-          }
-        },
       ),
       body: Container(
         decoration: BoxDecoration(
