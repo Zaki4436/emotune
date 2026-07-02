@@ -38,22 +38,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           await user.updatePassword(_newPasswordController.text.trim());
 
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Password successfully changed!"),
-                backgroundColor: Colors.green,
-              ),
-            );
             Navigator.pop(context);
           }
         } else {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("No user is currently signed in."),
-                backgroundColor: Colors.red,
-              ),
-            );
           }
         }
       } on FirebaseAuthException catch (e) {
@@ -69,21 +57,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         }
         
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(errorMessage),
-              backgroundColor: Colors.red,
-            ),
-          );
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("System Error: ${e.toString()}"),
-              backgroundColor: Colors.red,
-            ),
-          );
         }
       } finally {
         if (mounted) {

@@ -45,13 +45,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         });
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Account successfully created!"),
-              backgroundColor: Colors.green,
-            ),
-          );
-
           // Go straight to HomeScreen
           Navigator.pushAndRemoveUntil(
             context,
@@ -70,21 +63,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         }
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(errorMessage),
-              backgroundColor: Colors.red,
-            ),
-          );
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Firestore/System Error: ${e.toString()}"),
-              backgroundColor: Colors.red,
-            ),
-          );
         }
       } finally {
         if (mounted) {

@@ -46,12 +46,6 @@ class SettingsScreen extends StatelessWidget {
         }
 
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Account successfully deleted."),
-              backgroundColor: Colors.green,
-            ),
-          );
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => const LoginScreen()),

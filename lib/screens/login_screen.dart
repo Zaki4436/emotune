@@ -92,9 +92,6 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Google Sign-In Error: $e"), backgroundColor: Colors.red),
-        );
       }
     } finally {
       if (mounted) {
