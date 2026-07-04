@@ -196,7 +196,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
               children: [
                 const SizedBox(height: 40),
                 const Text(
-                  "Settings",
+                  "Profile Settings",
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
