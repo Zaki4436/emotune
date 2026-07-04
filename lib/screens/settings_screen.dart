@@ -6,8 +6,20 @@ import 'search_song_screen.dart';
 import 'login_screen.dart';
 import 'change_password_screen.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  final User? _currentUser = FirebaseAuth.instance.currentUser;
+
 
   Future<void> _logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
@@ -85,31 +97,8 @@ class SettingsScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text("Delete Account"),
-        content: const Text("Are you sure you want to delete your account? All data will be permanently lost."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _showSecondDeleteConfirmation(context);
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text("Delete"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showSecondDeleteConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Final Confirmation"),
-        content: const Text("This action CANNOT be undone. Are you absolutely sure you want to delete this account forever?"),
+        content: const Text(
+            "Are you sure you want to delete your account? This action is permanent and cannot be undone."),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -121,139 +110,205 @@ class SettingsScreen extends StatelessWidget {
               _deleteAccount(context);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text("Yes, Delete Forever"),
+            child: const Text("Delete"),
           ),
         ],
       ),
     );
   }
 
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeIn));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+            CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildBottomNavBar(BuildContext context) {
+    return BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
+      currentIndex: 2,
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: "Home",
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.search),
+          label: "Search",
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.settings),
+          label: "Settings",
+        ),
+      ],
+      onTap: (index) {
+        if (index == 0) {
+          Navigator.popUntil(context, (route) => route.isFirst);
+        } else if (index == 1) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SearchSongScreen()),
+          );
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text(
-          "Settings",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue.shade800, Colors.blue.shade400],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: 2,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: "Search",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: "Settings",
-          ),
-        ],
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.popUntil(context, (route) => route.isFirst);
-          } else if (index == 1) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SearchSongScreen()),
-            );
-          }
-        },
-      ),
+      bottomNavigationBar: _buildBottomNavBar(context),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.blue.shade50, Colors.white],
+            colors: [
+              Colors.blue.shade800,
+              Colors.blue.shade400,
+              Colors.white
+            ],
+            stops: const [0.0, 0.3, 0.3],
           ),
         ),
-        child: ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: [
-            const SizedBox(height: 10),
-            Card(
-              elevation: 2,
-              shadowColor: Colors.blue.withOpacity(0.1),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: [
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.lock, color: Colors.blue.shade600),
-                    ),
-                    title: const Text("Change Password", style: TextStyle(fontWeight: FontWeight.w600)),
-                    trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey.shade400),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
-                      );
-                    },
-                  ),
-                  Divider(height: 1, color: Colors.grey.shade200),
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.orange.shade50,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.logout, color: Colors.orange.shade600),
-                    ),
-                    title: const Text("Logout", style: TextStyle(fontWeight: FontWeight.w600)),
-                    trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey.shade400),
-                    onTap: () => _logout(context),
-                  ),
-                ],
-              ),
-            ),
-            Card(
-              elevation: 2,
-              shadowColor: Colors.red.withOpacity(0.1),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: Colors.red.shade100, width: 1),
-              ),
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: Colors.red.shade50, shape: BoxShape.circle),
-                  child: Icon(Icons.delete_forever, color: Colors.red.shade600),
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: ListView(
+              padding: const EdgeInsets.all(16.0),
+              children: [
+                const SizedBox(height: 40),
+                const Text(
+                  "Settings",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 28),
+                  textAlign: TextAlign.center,
                 ),
-                title: Text("Delete Account", style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red.shade700)),
-                trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.red.shade300),
-                onTap: () => _showDeleteConfirmation(context),
-              ),
+                const SizedBox(height: 20),
+                if (_currentUser?.email != null)
+                  Center(
+                    child: Column(
+                      children: [
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundColor: Colors.white.withOpacity(0.8),
+                          child: Icon(Icons.person,
+                              size: 30, color: Colors.blue.shade800),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          _currentUser!.email!,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 30),
+                Card(
+                  elevation: 2,
+                  shadowColor: Colors.blue.withOpacity(0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 8),
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.lock, color: Colors.blue.shade600),
+                        ),
+                        title: const Text("Change Password",
+                            style: TextStyle(fontWeight: FontWeight.w600)),
+                        trailing: Icon(Icons.arrow_forward_ios,
+                            size: 16, color: Colors.grey.shade400),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const ChangePasswordScreen()),
+                          );
+                        },
+                      ),
+                      Divider(height: 1, color: Colors.grey.shade200),
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 8),
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            shape: BoxShape.circle,
+                          ),
+                          child:
+                              Icon(Icons.logout, color: Colors.orange.shade600),
+                        ),
+                        title: const Text("Logout",
+                            style: TextStyle(fontWeight: FontWeight.w600)),
+                        trailing: Icon(Icons.arrow_forward_ios,
+                            size: 16, color: Colors.grey.shade400),
+                        onTap: () => _logout(context),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Card(
+                  elevation: 2,
+                  shadowColor: Colors.red.withOpacity(0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: Colors.red.shade100, width: 1),
+                  ),
+                  child: ListTile(
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                          color: Colors.red.shade50, shape: BoxShape.circle),
+                      child: Icon(Icons.delete_forever,
+                          color: Colors.red.shade600),
+                    ),
+                    title: Text("Delete Account",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.red.shade700)),
+                    trailing: Icon(Icons.arrow_forward_ios,
+                        size: 16, color: Colors.red.shade300),
+                    onTap: () => _showDeleteConfirmation(context),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
