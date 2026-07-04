@@ -88,7 +88,7 @@ class _SearchSongScreenState
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text(
-          "Search Songs",
+          "Search Your Songs",
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         centerTitle: true,
