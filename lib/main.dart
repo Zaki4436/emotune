@@ -57,9 +57,7 @@ class HomeScreen extends StatefulWidget {
       _HomeScreenState();
 }
 
-class _HomeScreenState
-    extends State<HomeScreen> {
-
+class _HomeScreenState extends State<HomeScreen> {
   // =========================
   // SERVICES
   // =========================
@@ -102,6 +100,13 @@ class _HomeScreenState
 
     initialize();
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+
 
   Future<void> initialize() async {
 
