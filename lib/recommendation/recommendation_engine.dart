@@ -4,9 +4,8 @@ import 'dart:math';
 
 class RecommendationEngine {
 
-  // ==========================
-  // COSINE SIMILARITY
-  // ==========================
+  // COSINE SIMILARITY CALCULATION
+
   static double cosineSimilarity(
       List<double> a,
       List<double> b,
