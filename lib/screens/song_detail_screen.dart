@@ -165,7 +165,7 @@ class _SongDetailScreenState
                                 ),
                               ),
                               const SizedBox(
-                                height: 25,
+                                height: 40,
                               ),
                               if (spotifyUrl !=
                                   null)
@@ -183,8 +183,8 @@ class _SongDetailScreenState
                                     ),
                                     elevation: 5,
                                   ),
-                                  icon: const Icon(Icons.play_circle_fill),
-                                  label: const Text("Open in Spotify", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                  icon: const Icon(Icons.play_circle_fill, size: 25),
+                                  label: const Text("Open in Spotify", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                                 ),
                             ],
                           );
@@ -238,7 +238,7 @@ class _SongDetailScreenState
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 25),
                       const Text(
                         "Lyrics",
                         style: TextStyle(
@@ -246,7 +246,7 @@ class _SongDetailScreenState
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 2),
                       Card(
                         elevation: 2,
                         shadowColor: Colors.blue.withOpacity(0.1),
@@ -259,7 +259,7 @@ class _SongDetailScreenState
                           padding: const EdgeInsets.all(20.0),
                           child: Text(
                             widget.song.lyrics.isNotEmpty ? widget.song.lyrics : "Lyrics not available.",
-                            textAlign: TextAlign.center,
+                            textAlign: TextAlign.justify,
                             style: TextStyle(
                               fontSize: 16,
                               height: 1.6,
