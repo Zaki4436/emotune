@@ -11,6 +11,7 @@ import 'recommendation/recommendation_engine.dart';
 import 'screens/songs_list_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/splash_screen.dart';
 
 Future<void> main() async{
 
@@ -31,7 +32,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const AuthGate(),
+      home: const SplashScreen(),
     );
   }
 }
