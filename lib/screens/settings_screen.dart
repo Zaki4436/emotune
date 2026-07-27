@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'search_song_screen.dart';
+import 'package:provider/provider.dart';
 import 'login_screen.dart';
 import 'change_password_screen.dart';
 
@@ -21,7 +22,10 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
   final User? _currentUser = FirebaseAuth.instance.currentUser;
 
 
-  Future<void> _logout(BuildContext context) async {
+  Future<void> _logout() async {
+    // Store navigator before the async gap to avoid using BuildContext across async gaps.
+    final navigator = Navigator.of(context);
+
     await FirebaseAuth.instance.signOut();
     
     try {
@@ -31,16 +35,19 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
       // Ignore errors if the user didn't log in with Google
     }
     
-    if (context.mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
+    if (mounted) {
+      navigator.pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
         (route) => false,
       );
     }
   }
 
-  Future<void> _deleteAccount(BuildContext context) async {
+  Future<void> _deleteAccount() async {
+    // Store instances before the async gap to avoid using BuildContext across async gaps.
+    final navigator = Navigator.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
@@ -57,9 +64,8 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           // Ignore errors
         }
 
-        if (context.mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
+        if (mounted) {
+          navigator.pushAndRemoveUntil(
             MaterialPageRoute(builder: (_) => const LoginScreen()),
             (route) => false,
           );
@@ -67,8 +73,8 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
       } on FirebaseAuthException catch (e) {
         // Firebase requires a recent login for sensitive functions
         if (e.code == 'requires-recent-login') {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
+          if (mounted) {
+            scaffoldMessenger.showSnackBar(
               const SnackBar(
                 content: Text("Please log out and log in again to delete the account."),
                 backgroundColor: Colors.red,
@@ -76,15 +82,15 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
             );
           }
         } else {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
+          if (mounted) {
+            scaffoldMessenger.showSnackBar(
               SnackBar(content: Text("Error: ${e.message}"), backgroundColor: Colors.red),
             );
           }
         }
       } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+        if (mounted) {
+          scaffoldMessenger.showSnackBar(
             SnackBar(content: Text("Error: $e"), backgroundColor: Colors.red),
           );
         }
@@ -92,7 +98,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
     }
   }
 
-  void _showDeleteConfirmation(BuildContext context) {
+  void _showDeleteConfirmation() {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -107,7 +113,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              _deleteAccount(context);
+              _deleteAccount();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text("Delete"),
@@ -117,6 +123,53 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
     );
   }
 
+  void _showThemeDialog() {
+    final themeProvider = Provider.of(context, listen: false);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Choose Theme"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<ThemeMode>(
+              title: const Text('Light'),
+              value: ThemeMode.light,
+              groupValue: themeProvider.themeMode,
+              onChanged: (value) {
+                if (value != null) {
+                  themeProvider.setTheme(value);
+                  Navigator.pop(ctx);
+                }
+              },
+            ),
+            RadioListTile<ThemeMode>(
+              title: const Text('Dark'),
+              value: ThemeMode.dark,
+              groupValue: themeProvider.themeMode,
+              onChanged: (value) {
+                if (value != null) {
+                  themeProvider.setTheme(value);
+                  Navigator.pop(ctx);
+                }
+              },
+            ),
+            RadioListTile<ThemeMode>(
+              title: const Text('System'),
+              value: ThemeMode.system,
+              groupValue: themeProvider.themeMode,
+              onChanged: (value) {
+                if (value != null) {
+                  themeProvider.setTheme(value);
+                  Navigator.pop(ctx);
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -264,6 +317,93 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                         leading: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.language, color: Colors.green.shade600),
+                        ),
+                        title: const Text("Language",
+                            style: TextStyle(fontWeight: FontWeight.w600)),
+                        trailing: Icon(Icons.arrow_forward_ios,
+                            size: 16, color: Colors.grey.shade400),
+                        onTap: () {
+                          // TODO: Implement language selection screen
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Language settings will be here")),
+                          );
+                        },
+                      ),
+                      Divider(height: 1, color: Colors.grey.shade200),
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 8),
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.deepPurple.shade50,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.brightness_6, color: Colors.deepPurple.shade600),
+                        ),
+                        title: const Text("Mode",
+                            style: TextStyle(fontWeight: FontWeight.w600)),
+                        trailing: Icon(Icons.arrow_forward_ios,
+                            size: 16, color: Colors.grey.shade400),
+                        onTap: _showThemeDialog,
+                      ),
+                      Divider(height: 1, color: Colors.grey.shade200),
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 8),
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.favorite, color: Colors.red.shade600),
+                        ),
+                        title: const Text("Favourite",
+                            style: TextStyle(fontWeight: FontWeight.w600)),
+                        trailing: Icon(Icons.arrow_forward_ios,
+                            size: 16, color: Colors.grey.shade400),
+                        onTap: () {
+                          // TODO: Navigate to favourite songs screen
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Favourite songs list will be here")),
+                          );
+                        },
+                      ),
+                      Divider(height: 1, color: Colors.grey.shade200),
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 8),
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.teal.shade50,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.history, color: Colors.teal.shade600),
+                        ),
+                        title: const Text("History",
+                            style: TextStyle(fontWeight: FontWeight.w600)),
+                        trailing: Icon(Icons.arrow_forward_ios,
+                            size: 16, color: Colors.grey.shade400),
+                        onTap: () {
+                          // TODO: Navigate to listening history screen
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Listening history will be here")),
+                          );
+                        },
+                      ),
+                      Divider(height: 1, color: Colors.grey.shade200),
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 8),
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
                             color: Colors.orange.shade50,
                             shape: BoxShape.circle,
                           ),
@@ -273,37 +413,28 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                         title: const Text("Logout",
                             style: TextStyle(fontWeight: FontWeight.w600)),
                         trailing: Icon(Icons.arrow_forward_ios,
-                            size: 16, color: Colors.grey.shade400),
-                        onTap: () => _logout(context),
+                          size: 16, color: Colors.grey.shade400),
+                        onTap: _logout,
+                      ),
+                      Divider(height: 1, color: Colors.grey.shade200),
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 8),
+                        leading: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.delete_forever, color: Colors.red.shade600),
+                        ),
+                        title: const Text("Delete Account",
+                            style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red)),
+                        trailing: Icon(Icons.arrow_forward_ios,
+                          size: 16, color: Colors.grey.shade400),
+                        onTap: _showDeleteConfirmation,
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Card(
-                  elevation: 2,
-                  shadowColor: Colors.red.withOpacity(0.1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: Colors.red.shade100, width: 1),
-                  ),
-                  child: ListTile(
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                          color: Colors.red.shade50, shape: BoxShape.circle),
-                      child: Icon(Icons.delete_forever,
-                          color: Colors.red.shade600),
-                    ),
-                    title: Text("Delete Account",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Colors.red.shade700)),
-                    trailing: Icon(Icons.arrow_forward_ios,
-                        size: 16, color: Colors.red.shade300),
-                    onTap: () => _showDeleteConfirmation(context),
                   ),
                 ),
               ],

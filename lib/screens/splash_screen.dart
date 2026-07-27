@@ -28,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Image.asset(
-        'assets/app icon/splash screen.gif',
+        'assets/app icon/splash_screen.gif',
         fit: BoxFit.cover,
         height: double.infinity,
         width: double.infinity,
