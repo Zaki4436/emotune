@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'search_song_screen.dart';
-import 'package:provider/provider.dart';
 import 'login_screen.dart';
 import 'change_password_screen.dart';
 
@@ -119,54 +118,6 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
             child: const Text("Delete"),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showThemeDialog() {
-    final themeProvider = Provider.of(context, listen: false);
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Choose Theme"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RadioListTile<ThemeMode>(
-              title: const Text('Light'),
-              value: ThemeMode.light,
-              groupValue: themeProvider.themeMode,
-              onChanged: (value) {
-                if (value != null) {
-                  themeProvider.setTheme(value);
-                  Navigator.pop(ctx);
-                }
-              },
-            ),
-            RadioListTile<ThemeMode>(
-              title: const Text('Dark'),
-              value: ThemeMode.dark,
-              groupValue: themeProvider.themeMode,
-              onChanged: (value) {
-                if (value != null) {
-                  themeProvider.setTheme(value);
-                  Navigator.pop(ctx);
-                }
-              },
-            ),
-            RadioListTile<ThemeMode>(
-              title: const Text('System'),
-              value: ThemeMode.system,
-              groupValue: themeProvider.themeMode,
-              onChanged: (value) {
-                if (value != null) {
-                  themeProvider.setTheme(value);
-                  Navigator.pop(ctx);
-                }
-              },
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -332,24 +283,6 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                             const SnackBar(content: Text("Language settings will be here")),
                           );
                         },
-                      ),
-                      Divider(height: 1, color: Colors.grey.shade200),
-                      ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 8),
-                        leading: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.deepPurple.shade50,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.brightness_6, color: Colors.deepPurple.shade600),
-                        ),
-                        title: const Text("Mode",
-                            style: TextStyle(fontWeight: FontWeight.w600)),
-                        trailing: Icon(Icons.arrow_forward_ios,
-                            size: 16, color: Colors.grey.shade400),
-                        onTap: _showThemeDialog,
                       ),
                       Divider(height: 1, color: Colors.grey.shade200),
                       ListTile(
