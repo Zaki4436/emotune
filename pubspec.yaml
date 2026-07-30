@@ -78,7 +78,6 @@ flutter:
     - assets/database/song.db
     - assets/app icon/logo.png
     - assets/app icon/google logo.png
-    - assets/app icon/splash_screen.gif
     - assets/app icon/splash screen.gif
 
   # To add assets to your application, add an assets section, like this:

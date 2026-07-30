@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'search_song_screen.dart';
 import 'login_screen.dart';
 import 'change_password_screen.dart';
+import 'history_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -324,9 +325,9 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                         trailing: Icon(Icons.arrow_forward_ios,
                             size: 16, color: Colors.grey.shade400),
                         onTap: () {
-                          // TODO: Navigate to listening history screen
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Listening history will be here")),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const HistoryScreen()),
                           );
                         },
                       ),
