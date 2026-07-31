@@ -31,7 +31,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Listening History'),
+        title: const Text('Recently Song Viewed'),
         backgroundColor: Colors.blue.shade800,
         elevation: 0,
       ),

@@ -1,13 +1,33 @@
 import 'package:flutter/material.dart';
 
+import '../database/database_service.dart';
+import '../models/song.dart';
+import 'song_detail_screen.dart';
+
 class FavouriteScreen extends StatefulWidget {
   const FavouriteScreen({super.key});
 
   @override
-  State<FavouriteScreen> createState() => _FavouriteScreenState();
+  State<FavouriteScreen> createState() =>
+      _FavouriteScreenState();
 }
 
 class _FavouriteScreenState extends State<FavouriteScreen> {
+  final DatabaseService _databaseService = DatabaseService();
+  late Future<List<Song>> _favouritesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavourites();
+  }
+
+  void _loadFavourites() {
+    setState(() {
+      _favouritesFuture = _databaseService.getFavouriteSongs();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,21 +37,69 @@ class _FavouriteScreenState extends State<FavouriteScreen> {
         elevation: 0,
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.blue.shade800, Colors.white],
-            stops: const [0.1, 0.1],
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.blue.shade800, Colors.white],
+              stops: const [0.1, 0.1],
+            ),
           ),
-        ),
-        child: const Center(
-          child: Text(
-            'Your favourite songs will appear here.',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-        ),
-      ),
+          child: FutureBuilder<List<Song>>(
+            future: _favouritesFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                    child: CircularProgressIndicator(color: Colors.white));
+              }
+
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'Error loading favourites: ${snapshot.error}',
+                    style: const TextStyle(fontSize: 16, color: Colors.red),
+                  ),
+                );
+              }
+
+              final favourites = snapshot.data;
+
+              if (favourites == null || favourites.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'Your favourite songs will appear here.',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                itemCount: favourites.length,
+                itemBuilder: (context, index) {
+                  final song = favourites[index];
+                  return Card(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 6),
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                          title: Text(song.title,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text(song.artist),
+                          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                          onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => SongDetailScreen(song: song)))
+                              .then((_) => _loadFavourites())));
+                },
+              );
+            },
+          )),
     );
   }
 }

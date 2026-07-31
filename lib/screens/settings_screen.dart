@@ -275,14 +275,14 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                           ),
                           child: Icon(Icons.language, color: Colors.green.shade600),
                         ),
-                        title: const Text("Language",
+                        title: const Text("Mode",
                             style: TextStyle(fontWeight: FontWeight.w600)),
                         trailing: Icon(Icons.arrow_forward_ios,
                             size: 16, color: Colors.grey.shade400),
                         onTap: () {
                           // TODO: Implement language selection screen
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Language settings will be here")),
+                            const SnackBar(content: Text("Mode settings will be here")),
                           );
                         },
                       ),

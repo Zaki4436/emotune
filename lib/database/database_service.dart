@@ -152,4 +152,89 @@ class DatabaseService {
 
     return orderedHistory;
   }
+
+  Future<void> addSongToFavourites(Song song) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final favouritesRef =
+        _firestore.collection('users').doc(user.uid).collection('favourites');
+
+    final docId =
+        '${song.title}_${song.artist}'.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
+
+    await favouritesRef.doc(docId).set({
+      'song_title': song.title,
+      'song_artist': song.artist,
+      'added_at': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> removeSongFromFavourites(Song song) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final favouritesRef =
+        _firestore.collection('users').doc(user.uid).collection('favourites');
+
+    final docId =
+        '${song.title}_${song.artist}'.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
+
+    await favouritesRef.doc(docId).delete();
+  }
+
+  Future<bool> isFavourite(Song song) async {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+
+    final docId =
+        '${song.title}_${song.artist}'.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
+
+    final favouriteDoc = await _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('favourites')
+        .doc(docId)
+        .get();
+
+    return favouriteDoc.exists;
+  }
+
+  Future<List<Song>> getFavouriteSongs() async {
+    final user = _auth.currentUser;
+    if (user == null) return [];
+
+    final favouritesSnapshot = await _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('favourites')
+        .orderBy('added_at', descending: true)
+        .get();
+
+    if (favouritesSnapshot.docs.isEmpty) return [];
+
+    final songIdentifiers = favouritesSnapshot.docs.map((doc) {
+      return {
+        'title': doc.data()['song_title'] as String,
+        'artist': doc.data()['song_artist'] as String,
+      };
+    }).toList();
+
+    final db = await database;
+    final whereClause =
+        songIdentifiers.map((_) => '(song = ? AND "Artist(s)" = ?)').join(' OR ');
+    final whereArgs =
+        songIdentifiers.expand((id) => [id['title']!, id['artist']!]).toList();
+
+    final songMaps = await db.query('song', where: whereClause, whereArgs: whereArgs);
+    final allFoundSongs = songMaps.map((map) => Song.fromMap(map)).toList();
+
+    final orderedFavourites = <Song>[];
+    for (final identifier in songIdentifiers) {
+      final song = allFoundSongs.where((s) => s.title == identifier['title'] && s.artist == identifier['artist']);
+      if (song.isNotEmpty) orderedFavourites.add(song.first);
+    }
+
+    return orderedFavourites;
+  }
 }

@@ -38,11 +38,15 @@ class _SongDetailScreenState
   late AnimationController _imageAnimationController;
   late Animation<double> _imageScaleAnimation;
 
+  bool _isFavourite = false;
+  bool _isCheckingFavourite = true;
+
   @override
   void initState() {
     super.initState();
 
     _databaseService.addSongToHistory(widget.song);
+    _checkIfFavourite();
 
     _animationController = AnimationController(
       vsync: this,
@@ -63,6 +67,29 @@ class _SongDetailScreenState
     _imageScaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
       CurvedAnimation(parent: _imageAnimationController, curve: Curves.easeInOut),
     );
+  }
+
+  void _checkIfFavourite() async {
+    final isFav = await _databaseService.isFavourite(widget.song);
+    if (mounted) {
+      setState(() {
+        _isFavourite = isFav;
+        _isCheckingFavourite = false;
+      });
+    }
+  }
+
+  void _toggleFavourite() async {
+    final newFavouriteState = !_isFavourite;
+    setState(() {
+      _isFavourite = newFavouriteState;
+    });
+
+    if (newFavouriteState) {
+      await _databaseService.addSongToFavourites(widget.song);
+    } else {
+      await _databaseService.removeSongFromFavourites(widget.song);
+    }
   }
 
   @override
@@ -286,6 +313,23 @@ class _SongDetailScreenState
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () => Navigator.of(context).pop(),
               ),
+            ),
+            Positioned(
+              top: MediaQuery.of(context).padding.top,
+              right: 8,
+              child: _isCheckingFavourite
+                  ? IconButton(
+                      icon: const Icon(Icons.favorite_border, color: Colors.white54),
+                      onPressed: null,
+                    )
+                  : IconButton(
+                      icon: Icon(
+                        _isFavourite ? Icons.favorite : Icons.favorite_border,
+                        color: _isFavourite ? Colors.red.shade400 : Colors.white,
+                        size: 30,
+                      ),
+                      onPressed: _toggleFavourite,
+                    ),
             ),
           ],
         ),
