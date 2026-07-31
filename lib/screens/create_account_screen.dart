@@ -15,6 +15,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   String? _errorMessage;
@@ -60,6 +61,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
             .collection('users')
             .doc(userCredential.user!.uid)
             .set({
+          'username': _usernameController.text.trim(),
           'email': _emailController.text.trim(),
           'created_at': FieldValue.serverTimestamp(),
         });
@@ -102,6 +104,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _usernameController.dispose();
     _animationController.dispose();
     super.dispose();
   }
@@ -163,6 +166,34 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                 style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                               ),
                               const SizedBox(height: 30),
+                              TextFormField(
+                                controller: _usernameController,
+                                decoration: InputDecoration(
+                                  labelText: 'Username',
+                                  filled: true,
+                                  fillColor: Colors.grey.shade50,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(color: Colors.grey.shade300),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(color: Colors.blue.shade400, width: 2),
+                                  ),
+                                  prefixIcon: Icon(Icons.person, color: Colors.blue.shade600),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter a username';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
                               TextFormField(
                                 controller: _emailController,
                                 decoration: InputDecoration(

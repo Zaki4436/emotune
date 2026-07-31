@@ -3,10 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'search_song_screen.dart';
+import 'package:provider/provider.dart';
 import 'login_screen.dart';
 import 'change_password_screen.dart';
 import 'history_screen.dart';
 import 'favourite_screen.dart';
+import '../provider/theme_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -21,6 +23,8 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
   late Animation<Offset> _slideAnimation;
 
   final User? _currentUser = FirebaseAuth.instance.currentUser;
+  String? _username;
+  bool _isLoadingUsername = true;
 
 
   Future<void> _logout() async {
@@ -124,9 +128,54 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
     );
   }
 
+  void _showThemeDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+        // Using a temporary variable to hold the selected value inside the dialog
+        ThemeMode? selectedMode = themeProvider.themeMode;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text("Select Mode"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: ThemeMode.values.map((mode) {
+                  return RadioListTile<ThemeMode>(
+                    title: Text(mode.name[0].toUpperCase() + mode.name.substring(1)),
+                    value: mode,
+                    groupValue: selectedMode,
+                    onChanged: (ThemeMode? value) {
+                      if (value != null) {
+                        setDialogState(() {
+                          selectedMode = value;
+                        });
+                      }
+                    },
+                  );
+                }).toList(),
+              ),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text("Cancel")),
+                TextButton(
+                    onPressed: () {
+                      if (selectedMode != null) themeProvider.setThemeMode(selectedMode!);
+                      Navigator.pop(dialogContext);
+                    },
+                    child: const Text("OK")),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
+    _loadUsername();
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -137,6 +186,27 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
         Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
             CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
     _animationController.forward();
+  }
+
+  Future<void> _loadUsername() async {
+    if (_currentUser != null) {
+      try {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(_currentUser.uid)
+            .get();
+        if (mounted && userDoc.exists) {
+          setState(() {
+            _username = userDoc.data()?['username'];
+          });
+        }
+      } catch (e) {
+        // Fallback to email on error
+      }
+    }
+    if (mounted) {
+      setState(() => _isLoadingUsername = false);
+    }
   }
 
   @override
@@ -210,24 +280,31 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
-                if (_currentUser?.email != null)
+                if (_currentUser != null)
                   Center(
                     child: Column(
                       children: [
                         CircleAvatar(
                           radius: 30,
                           backgroundColor: Colors.white.withOpacity(0.8),
-                          child: Icon(Icons.person,
-                              size: 30, color: Colors.blue.shade800),
+                          child:
+                              Icon(Icons.person, size: 30, color: Colors.blue.shade800),
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          _currentUser!.email!,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500),
-                        ),
+                        _isLoadingUsername
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                    color: Colors.white, strokeWidth: 2),
+                              )
+                            : Text( // Display username, or 'No Username' if not available
+                                _username ?? 'No Username',
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500),
+                              ),
                       ],
                     ),
                   ),
@@ -273,18 +350,13 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                             color: Colors.green.shade50,
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.language, color: Colors.green.shade600),
+                          child: Icon(Icons.palette, color: Colors.green.shade600),
                         ),
                         title: const Text("Mode",
                             style: TextStyle(fontWeight: FontWeight.w600)),
                         trailing: Icon(Icons.arrow_forward_ios,
                             size: 16, color: Colors.grey.shade400),
-                        onTap: () {
-                          // TODO: Implement language selection screen
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Mode settings will be here")),
-                          );
-                        },
+                        onTap: _showThemeDialog,
                       ),
                       Divider(height: 1, color: Colors.grey.shade200),
                       ListTile(

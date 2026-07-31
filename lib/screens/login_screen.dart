@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../main.dart';
 import 'create_account_screen.dart';
@@ -101,7 +102,24 @@ class _LoginScreenState extends State<LoginScreen>
       );
 
       // Log into Firebase using the Google token
-      await FirebaseAuth.instance.signInWithCredential(credential);
+      final userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      // If this is the first time the user is signing in, create a new document
+      if (userCredential.user != null) {
+        final userDoc = FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user!.uid);
+        final docSnapshot = await userDoc.get();
+
+        if (!docSnapshot.exists) {
+          await userDoc.set({
+            'username': userCredential.user!.displayName,
+            'email': userCredential.user!.email,
+            'created_at': FieldValue.serverTimestamp(),
+          });
+        }
+      }
 
       if (mounted) {
         Navigator.pushReplacement(
