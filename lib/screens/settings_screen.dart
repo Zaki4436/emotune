@@ -6,6 +6,7 @@ import 'search_song_screen.dart';
 import 'login_screen.dart';
 import 'change_password_screen.dart';
 import 'history_screen.dart';
+import 'favourite_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -302,9 +303,10 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                         trailing: Icon(Icons.arrow_forward_ios,
                             size: 16, color: Colors.grey.shade400),
                         onTap: () {
-                          // TODO: Navigate to favourite songs screen
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Favourite songs list will be here")),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const FavouriteScreen()),
                           );
                         },
                       ),

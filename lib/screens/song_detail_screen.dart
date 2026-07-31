@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../database/database_service.dart';
 import '../models/song.dart';
 import '../service/spotify_service.dart';
 
@@ -28,6 +29,8 @@ class _SongDetailScreenState
       spotifyService =
       SpotifyService();
 
+  final DatabaseService _databaseService = DatabaseService();
+
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -38,6 +41,9 @@ class _SongDetailScreenState
   @override
   void initState() {
     super.initState();
+
+    _databaseService.addSongToHistory(widget.song);
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
