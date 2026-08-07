@@ -289,14 +289,19 @@ class _SongDetailScreenState
                         ),
                         child: Container(
                           width: double.infinity,
+                          height: 300,
                           padding: const EdgeInsets.all(20.0),
-                          child: Text(
-                            widget.song.lyrics.isNotEmpty ? widget.song.lyrics : "Lyrics not available.",
-                            textAlign: TextAlign.justify,
-                            style: TextStyle(
-                              fontSize: 16,
-                              height: 1.6,
-                              color: Colors.grey.shade800,
+                          child: Scrollbar(
+                            child: SingleChildScrollView(
+                              child: Text(
+                                widget.song.lyrics.isNotEmpty ? widget.song.lyrics : "Lyrics not available.",
+                                textAlign: TextAlign.justify,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  height: 1.6,
+                                  color: Colors.grey.shade800,
+                                ),
+                              ),
                             ),
                           ),
                         ),
