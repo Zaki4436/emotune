@@ -102,6 +102,9 @@ class _SongDetailScreenState
   @override
   Widget build(BuildContext context) {
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final imageSize = screenWidth * 0.6;
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -143,9 +146,10 @@ class _SongDetailScreenState
                           if (snapshot.connectionState ==
                               ConnectionState
                                   .waiting) {
-                            return const SizedBox(
-                              height: 250,
-                              child: Center(
+                            return SizedBox(
+                              height: imageSize,
+                              width: imageSize,
+                              child: const Center(
                                 child:
                                 CircularProgressIndicator(color: Colors.white),
                               ),
@@ -177,20 +181,20 @@ class _SongDetailScreenState
                                     child: imageUrl != null
                                         ? Image.network(
                                             imageUrl,
-                                            height: 250,
-                                            width: 250,
+                                            height: imageSize,
+                                            width: imageSize,
                                             fit: BoxFit.cover,
                                           )
                                         : Container(
-                                            height: 250,
-                                            width: 250,
+                                            height: imageSize,
+                                            width: imageSize,
                                             decoration: BoxDecoration(
                                               color: Colors.blue.shade100,
                                               borderRadius: BorderRadius.circular(20),
                                             ),
                                             child: Icon(
                                               Icons.music_note,
-                                              size: 100,
+                                              size: imageSize * 0.4,
                                               color: Colors.blue.shade300,
                                             ),
                                           ),
@@ -289,7 +293,7 @@ class _SongDetailScreenState
                         ),
                         child: Container(
                           width: double.infinity,
-                          height: 490,
+                          height: MediaQuery.of(context).size.height * 0.58,
                           padding: const EdgeInsets.all(20.0),
                           child: Scrollbar(
                             child: SingleChildScrollView(

@@ -44,6 +44,9 @@ class _SongsListScreenState extends State<SongsListScreen> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -66,16 +69,16 @@ class _SongsListScreenState extends State<SongsListScreen> with SingleTickerProv
                 position: _slideAnimation,
                 child: Column(
                   children: [
-                    SizedBox(height: MediaQuery.of(context).padding.top + 50),
+                    SizedBox(height: MediaQuery.of(context).padding.top + screenHeight * 0.05),
                     Text(
                       "Songs For ${widget.emotion}",
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
-                          fontSize: 28),
+                          fontSize: screenWidth * 0.07),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: screenHeight * 0.02),
                     Expanded(
                       child: widget.recommendedSongs.isEmpty
                           ? Center(
@@ -83,20 +86,20 @@ class _SongsListScreenState extends State<SongsListScreen> with SingleTickerProv
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.music_off, size: 64, color: Colors.blue.shade200),
-                                  const SizedBox(height: 16),
+                                  SizedBox(height: screenHeight * 0.02),
                                   Text(
                                     "No recommended songs found.",
-                                    style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                                    style: TextStyle(fontSize: screenWidth * 0.04, color: Colors.grey.shade600),
                                   ),
                                 ],
                               ),
                             )
                           : ListView.builder(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 8),
                               itemCount: widget.recommendedSongs.length,
                               itemBuilder: (context, index) {
                                 final item = widget.recommendedSongs[index];
-                                Song song = item["song"] as Song;
+                                final Song song = item["song"] as Song;
                                 return Card(
                                   elevation: 2,
                                   shadowColor: Colors.blue.withOpacity(0.1),
@@ -105,7 +108,7 @@ class _SongsListScreenState extends State<SongsListScreen> with SingleTickerProv
                                   ),
                                   margin: const EdgeInsets.symmetric(vertical: 6),
                                   child: ListTile(
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    contentPadding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: 8),
                                     leading: CircleAvatar(
                                       backgroundColor: Colors.blue.shade100,
                                       foregroundColor: Colors.blue.shade900,
@@ -122,7 +125,7 @@ class _SongsListScreenState extends State<SongsListScreen> with SingleTickerProv
                                     isThreeLine: true,
                                     trailing: Icon(
                                       Icons.play_circle_fill,
-                                      size: 36,
+                                      size: screenWidth * 0.09,
                                       color: Colors.blue.shade400,
                                     ),
                                     onTap: () {

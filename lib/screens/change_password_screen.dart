@@ -115,6 +115,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> with Single
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -128,7 +131,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> with Single
           children: [
             Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
                 child: FadeTransition(
                   opacity: _fadeAnimation,
                   child: SlideTransition(
@@ -140,7 +143,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> with Single
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(24.0),
+                        padding: EdgeInsets.all(screenWidth * 0.06),
                         child: Form(
                           key: _formKey,
                           child: Column(
@@ -153,23 +156,23 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> with Single
                                   color: Colors.blue.shade50,
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(Icons.lock_reset, size: 60, color: Colors.blue.shade600),
+                                child: Icon(Icons.lock_reset, size: screenWidth * 0.15, color: Colors.blue.shade600),
                               ),
-                              const SizedBox(height: 20),
+                              SizedBox(height: screenHeight * 0.025),
                               Text(
                                 "Change Password",
                                 style: TextStyle(
-                                  fontSize: 24,
+                                  fontSize: screenWidth * 0.06,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.blue.shade900,
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: screenHeight * 0.01),
                               Text(
                                 "Update your security credentials",
-                                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                                style: TextStyle(fontSize: screenWidth * 0.035, color: Colors.grey.shade600),
                               ),
-                              const SizedBox(height: 30),
+                              SizedBox(height: screenHeight * 0.04),
                               TextFormField(
                                 controller: _emailController,
                                 decoration: InputDecoration(
@@ -193,7 +196,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> with Single
                                 keyboardType: TextInputType.emailAddress,
                                 validator: (value) => value == null || value.isEmpty ? 'Please enter your email' : null,
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: screenHeight * 0.02),
                               TextFormField(
                                 controller: _currentPasswordController,
                                 obscureText: !_isCurrentPasswordVisible,
@@ -228,7 +231,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> with Single
                                 ),
                                 validator: (value) => value == null || value.isEmpty ? 'Please enter your current password' : null,
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: screenHeight * 0.02),
                               TextFormField(
                                 controller: _newPasswordController,
                                 obscureText: !_isNewPasswordVisible,
@@ -274,7 +277,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> with Single
                                   return null;
                                 },
                               ),
-                              const SizedBox(height: 24),
+                              SizedBox(height: screenHeight * 0.03),
                               if (_errorMessage != null)
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 16.0),
@@ -316,8 +319,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> with Single
               ),
             ),
             Positioned(
-              top: 40,
-              left: 16,
+              top: MediaQuery.of(context).padding.top,
+              left: 8,
               child: IconButton(
                 icon: Icon(Icons.arrow_back, color: Colors.blue.shade800),
                 onPressed: () => Navigator.of(context).pop(),

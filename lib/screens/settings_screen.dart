@@ -248,6 +248,9 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       bottomNavigationBar: _buildBottomNavBar(context),
       body: Container(
@@ -270,7 +273,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                const SizedBox(height: 40),
+                SizedBox(height: screenHeight * 0.05),
                 const Text(
                   "Profile Settings",
                   style: TextStyle(
@@ -285,10 +288,10 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                     child: Column(
                       children: [
                         CircleAvatar(
-                          radius: 30,
+                          radius: screenWidth * 0.08,
                           backgroundColor: Colors.white.withOpacity(0.8),
                           child:
-                              Icon(Icons.person, size: 30, color: Colors.blue.shade800),
+                              Icon(Icons.person, size: screenWidth * 0.08, color: Colors.blue.shade800),
                         ),
                         const SizedBox(height: 12),
                         _isLoadingUsername

@@ -111,6 +111,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -124,7 +127,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
           children: [
             Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
                 child: FadeTransition(
                   opacity: _fadeAnimation,
                   child: SlideTransition(
@@ -136,7 +139,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(24.0),
+                        padding: EdgeInsets.all(screenWidth * 0.06),
                         child: Form(
                           key: _formKey,
                           child: Column(
@@ -149,23 +152,23 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                   color: Colors.blue.shade50,
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(Icons.person_add, size: 60, color: Colors.blue.shade600),
+                                child: Icon(Icons.person_add, size: screenWidth * 0.15, color: Colors.blue.shade600),
                               ),
-                              const SizedBox(height: 20),
+                              SizedBox(height: screenHeight * 0.025),
                               Text(
                                 "Create Account",
                                 style: TextStyle(
-                                  fontSize: 24,
+                                  fontSize: screenWidth * 0.06,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.blue.shade900,
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: screenHeight * 0.01),
                               Text(
                                 "Sign up to get started",
-                                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                                style: TextStyle(fontSize: screenWidth * 0.035, color: Colors.grey.shade600),
                               ),
-                              const SizedBox(height: 30),
+                              SizedBox(height: screenHeight * 0.04),
                               TextFormField(
                                 controller: _usernameController,
                                 decoration: InputDecoration(
@@ -193,7 +196,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                   return null;
                                 },
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: screenHeight * 0.02),
                               TextFormField(
                                 controller: _emailController,
                                 decoration: InputDecoration(
@@ -225,7 +228,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                   return null;
                                 },
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: screenHeight * 0.02),
                               TextFormField(
                                 controller: _passwordController,
                                 decoration: InputDecoration(
@@ -266,7 +269,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                   return null;
                                 },
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: screenHeight * 0.02),
                               TextFormField(
                                 controller: _confirmPasswordController,
                                 decoration: InputDecoration(
@@ -308,7 +311,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                   return null;
                                 },
                               ),
-                              const SizedBox(height: 24),
+                              SizedBox(height: screenHeight * 0.03),
                               if (_errorMessage != null)
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 16.0),
@@ -323,7 +326,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                 width: double.infinity,
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -338,7 +341,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
                                           height: 24,
                                           child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                                         )
-                                      : const Text("Register Account", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                      : Text("Register Account", style: TextStyle(fontSize: screenWidth * 0.045, fontWeight: FontWeight.bold)),
                                 ),
                               ),
                             ],
@@ -351,8 +354,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen>
               ),
             ),
             Positioned(
-              top: 40,
-              left: 16,
+              top: MediaQuery.of(context).padding.top,
+              left: 8,
               child: IconButton(
                 icon: Icon(Icons.arrow_back, color: Colors.blue.shade800),
                 onPressed: () => Navigator.of(context).pop(),

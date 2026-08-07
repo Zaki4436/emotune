@@ -29,6 +29,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recently Song Viewed'),
@@ -56,7 +58,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               return Center(
                 child: Text(
                   'Error loading history: ${snapshot.error}',
-                  style: const TextStyle(fontSize: 16, color: Colors.red),
+                  style: TextStyle(fontSize: screenWidth * 0.04, color: Colors.red),
                 ),
               );
             }
@@ -64,10 +66,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
             final history = snapshot.data;
 
             if (history == null || history.isEmpty) {
-              return const Center(
+              return Center(
                 child: Text(
                   'Your listening history will appear here.',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                  style: TextStyle(fontSize: screenWidth * 0.04, color: Colors.grey),
                 ),
               );
             }
@@ -77,18 +79,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
               itemBuilder: (context, index) {
                 final song = history[index];
                 return Card(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  margin: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.04, vertical: 6),
                   elevation: 2,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                   child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.05, vertical: 10),
                       title: Text(song.title,
                           style: const TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: Text(song.artist),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      trailing: Icon(Icons.arrow_forward_ios, size: screenWidth * 0.04),
                       onTap: () => Navigator.push(context,
                               MaterialPageRoute(builder: (_) => SongDetailScreen(song: song)))
                           .then((_) => _loadHistory())),

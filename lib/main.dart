@@ -619,7 +619,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 child: Image.file(
                                   selectedImage!,
-                                  height: 200,
+                                  height: MediaQuery.of(context).size.height * 0.25,
                                   width: double.infinity,
                                   fit: BoxFit.cover,
                                 ),

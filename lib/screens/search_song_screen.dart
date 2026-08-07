@@ -104,6 +104,9 @@ class _SearchSongScreenState
   @override
   Widget build(BuildContext context) {
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
 
       bottomNavigationBar:
@@ -189,17 +192,17 @@ class _SearchSongScreenState
                   position: _slideAnimation,
                   child: Column(
                     children: [
-                      SizedBox(height: MediaQuery.of(context).padding.top + 20),
-                      const Text(
+                      SizedBox(height: MediaQuery.of(context).padding.top + screenHeight * 0.02),
+                      Text(
                         "Search Your Songs",
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
-                            fontSize: 28),
+                            fontSize: screenWidth * 0.07),
                         textAlign: TextAlign.center,
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: EdgeInsets.all(screenWidth * 0.04),
                         child: TextField(
                           decoration: InputDecoration(
                             hintText: "Search song or artist",
@@ -218,7 +221,7 @@ class _SearchSongScreenState
                               borderSide: BorderSide(color: Colors.blue.shade400, width: 2),
                             ),
                             prefixIcon: Icon(Icons.search, color: Colors.blue.shade600),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                            contentPadding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
                           ),
                           onChanged: searchSong,
                         ),
@@ -229,17 +232,17 @@ class _SearchSongScreenState
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.music_note, size: 64, color: Colors.blue.shade200),
-                                    const SizedBox(height: 16),
+                                    Icon(Icons.music_note, size: screenWidth * 0.15, color: Colors.blue.shade200),
+                                    SizedBox(height: screenHeight * 0.02),
                                     Text(
                                       "Search for a song or artist",
-                                      style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                                      style: TextStyle(fontSize: screenWidth * 0.04, color: Colors.grey.shade600),
                                     ),
                                   ],
                                 ),
                               )
                             : ListView.builder(
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
                                 itemCount: filteredSongs.length,
                                 itemBuilder: (context, index) {
                                   final song = filteredSongs[index];
@@ -251,7 +254,7 @@ class _SearchSongScreenState
                                     ),
                                     margin: const EdgeInsets.symmetric(vertical: 6),
                                     child: ListTile(
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      contentPadding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: 8),
                                       leading: CircleAvatar(
                                         backgroundColor: Colors.blue.shade100,
                                         foregroundColor: Colors.blue.shade900,
@@ -268,7 +271,7 @@ class _SearchSongScreenState
                                       isThreeLine: true,
                                       trailing: Icon(
                                         Icons.arrow_forward_ios,
-                                        size: 16,
+                                        size: screenWidth * 0.04,
                                         color: Colors.blue.shade300,
                                       ),
                                       onTap: () {

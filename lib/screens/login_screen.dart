@@ -149,6 +149,9 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -160,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen>
         ),
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
             child: FadeTransition(
               opacity: _fadeAnimation,
               child: SlideTransition(
@@ -172,7 +175,7 @@ class _LoginScreenState extends State<LoginScreen>
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(24.0),
+                    padding: EdgeInsets.all(screenWidth * 0.06),
                     child: Form(
                       key: _formKey,
                       child: Column(
@@ -193,26 +196,26 @@ class _LoginScreenState extends State<LoginScreen>
                             ),
                             child: Image.asset(
                               'assets/app icon/logo.png',
-                              width: 60,
-                              height: 60,
+                              width: screenWidth * 0.15,
+                              height: screenWidth * 0.15,
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: screenHeight * 0.025),
                           Text(
                             "Welcome to Emotune",
                             style: TextStyle(
-                              fontSize: 24,
+                              fontSize: screenWidth * 0.06,
                               fontWeight: FontWeight.bold,
                               color: Colors.blue.shade900,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: screenHeight * 0.01),
                           Text(
                             "Login to continue",
                             style: TextStyle(
-                                fontSize: 16, color: Colors.grey.shade600),
+                                fontSize: screenWidth * 0.04, color: Colors.grey.shade600),
                           ),
-                          const SizedBox(height: 30),
+                          SizedBox(height: screenHeight * 0.04),
                           TextFormField(
                             controller: _emailController,
                             decoration: InputDecoration(
@@ -244,7 +247,7 @@ class _LoginScreenState extends State<LoginScreen>
                               return null;
                             },
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: screenHeight * 0.02),
                           TextFormField(
                             controller: _passwordController,
                             decoration: InputDecoration(
@@ -289,7 +292,7 @@ class _LoginScreenState extends State<LoginScreen>
                               return null;
                             },
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(height: screenHeight * 0.03),
                           if (_errorMessage != null)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 16.0),
@@ -305,8 +308,7 @@ class _LoginScreenState extends State<LoginScreen>
                             width: double.infinity,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
+                                padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -322,20 +324,20 @@ class _LoginScreenState extends State<LoginScreen>
                                       child: CircularProgressIndicator(
                                           color: Colors.white, strokeWidth: 2),
                                     )
-                                  : const Text("Login",
+                                  : Text("Login",
                                       style: TextStyle(
-                                          fontSize: 18,
+                                          fontSize: screenWidth * 0.045,
                                           fontWeight: FontWeight.bold)),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: screenHeight * 0.02),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text("Don't have an account?",
                                   style: TextStyle(
                                       color: Colors.grey.shade700,
-                                      fontSize: 14)),
+                                      fontSize: screenWidth * 0.035)),
                               TextButton(
                                 onPressed: () {
                                   Navigator.push(
@@ -351,20 +353,19 @@ class _LoginScreenState extends State<LoginScreen>
                                   style: TextStyle(
                                     color: Colors.blue.shade700,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 14,
+                                    fontSize: screenWidth * 0.035,
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 10),
+                          SizedBox(height: screenHeight * 0.015),
                           Row(
                             children: [
                               Expanded(
                                   child: Divider(color: Colors.grey.shade300)),
                               Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 10),
+                                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.025),
                                 child: Text("OR",
                                     style:
                                         TextStyle(color: Colors.grey.shade500)),
@@ -373,13 +374,12 @@ class _LoginScreenState extends State<LoginScreen>
                                   child: Divider(color: Colors.grey.shade300)),
                             ],
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: screenHeight * 0.025),
                           SizedBox(
                             width: double.infinity,
                             child: OutlinedButton.icon(
                               style: OutlinedButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
+                                padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -393,11 +393,11 @@ class _LoginScreenState extends State<LoginScreen>
                                       height: 24,
                                       child:
                                           CircularProgressIndicator(strokeWidth: 2))
-                                  : Image.asset('assets/app icon/google logo.png', height: 24, width: 24),
-                              label: const Text(
+                                  : Image.asset('assets/app icon/google logo.png', height: screenHeight * 0.03, width: screenHeight * 0.03),
+                              label: Text(
                                 "Login with Google",
                                 style: TextStyle(
-                                    fontSize: 16,
+                                    fontSize: screenWidth * 0.04,
                                     color: Colors.black87,
                                     fontWeight: FontWeight.bold),
                               ),
