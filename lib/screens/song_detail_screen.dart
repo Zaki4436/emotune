@@ -289,7 +289,7 @@ class _SongDetailScreenState
                         ),
                         child: Container(
                           width: double.infinity,
-                          height: 300,
+                          height: 490,
                           padding: const EdgeInsets.all(20.0),
                           child: Scrollbar(
                             child: SingleChildScrollView(
