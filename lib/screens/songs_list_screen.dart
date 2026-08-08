@@ -46,6 +46,14 @@ class _SongsListScreenState extends State<SongsListScreen> with SingleTickerProv
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundStart = isDark ? const Color(0xFF0F172A) : theme.colorScheme.primary.withOpacity(0.95);
+    final backgroundMid = isDark ? const Color(0xFF1E293B) : theme.colorScheme.secondary.withOpacity(0.8);
+    final backgroundEnd = isDark ? const Color(0xFF111827) : theme.colorScheme.surface;
+    final surfaceColor = isDark ? const Color(0xFF1F2937) : Colors.white;
+    final mutedText = isDark ? const Color(0xFFCBD5E1) : theme.colorScheme.onSurfaceVariant;
+    final borderColor = isDark ? Colors.white.withOpacity(0.08) : Colors.transparent;
 
     return Scaffold(
       body: Container(
@@ -54,11 +62,10 @@ class _SongsListScreenState extends State<SongsListScreen> with SingleTickerProv
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.blue.shade800,
-              Colors.blue.shade400,
-              Colors.white
+              backgroundStart,
+              backgroundMid,
+              backgroundEnd,
             ],
-            stops: const [0.0, 0.3, 0.3],
           ),
         ),
         child: Stack(
@@ -67,92 +74,175 @@ class _SongsListScreenState extends State<SongsListScreen> with SingleTickerProv
               opacity: _fadeAnimation,
               child: SlideTransition(
                 position: _slideAnimation,
-                child: Column(
-                  children: [
-                    SizedBox(height: MediaQuery.of(context).padding.top + screenHeight * 0.05),
-                    Text(
-                      "Songs For ${widget.emotion}",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: screenWidth * 0.07),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: screenHeight * 0.02),
-                    Expanded(
-                      child: widget.recommendedSongs.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.music_off, size: 64, color: Colors.blue.shade200),
-                                  SizedBox(height: screenHeight * 0.02),
-                                  Text(
-                                    "No recommended songs found.",
-                                    style: TextStyle(fontSize: screenWidth * 0.04, color: Colors.grey.shade600),
-                                  ),
-                                ],
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                        child: Center(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Mood-inspired picks",
+                                style: theme.textTheme.labelLarge?.copyWith(
+                                  color: isDark ? const Color(0xFF93C5FD) : Colors.white.withOpacity(0.9),
+                                  letterSpacing: 0.5,
+                                ),
                               ),
-                            )
-                          : ListView.builder(
-                              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 8),
-                              itemCount: widget.recommendedSongs.length,
-                              itemBuilder: (context, index) {
-                                final item = widget.recommendedSongs[index];
-                                final Song song = item["song"] as Song;
-                                return Card(
-                                  elevation: 2,
-                                  shadowColor: Colors.blue.withOpacity(0.1),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Songs for ${widget.emotion}",
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  color: isDark ? Colors.white : Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: widget.recommendedSongs.isEmpty
+                            ? Center(
+                                child: Container(
+                                  margin: const EdgeInsets.all(24),
+                                  padding: const EdgeInsets.all(28),
+                                  decoration: BoxDecoration(
+                                    color: surfaceColor,
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(color: borderColor),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: isDark ? Colors.black.withOpacity(0.35) : Colors.black.withOpacity(0.06),
+                                        blurRadius: 20,
+                                        offset: const Offset(0, 10),
+                                      ),
+                                    ],
                                   ),
-                                  margin: const EdgeInsets.symmetric(vertical: 6),
-                                  child: ListTile(
-                                    contentPadding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: 8),
-                                    leading: CircleAvatar(
-                                      backgroundColor: Colors.blue.shade100,
-                                      foregroundColor: Colors.blue.shade900,
-                                      child: const Icon(Icons.music_note),
-                                    ), 
-                                    title: Text(
-                                      song.title,
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.music_off_rounded, size: 64, color: theme.colorScheme.primary),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        "No recommended songs found.",
+                                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        "Try another emotion or refresh your selection.",
+                                        textAlign: TextAlign.center,
+                                        style: theme.textTheme.bodyMedium?.copyWith(
+                                          color: mutedText,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : ListView.builder(
+                                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                                itemCount: widget.recommendedSongs.length,
+                                itemBuilder: (context, index) {
+                                  final item = widget.recommendedSongs[index];
+                                  final Song song = item["song"] as Song;
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    decoration: BoxDecoration(
+                                      color: surfaceColor,
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(color: borderColor),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: isDark ? Colors.black.withOpacity(0.25) : Colors.black.withOpacity(0.05),
+                                          blurRadius: 16,
+                                          offset: const Offset(0, 8),
+                                        ),
+                                      ],
                                     ),
-                                    subtitle: Text(
-                                      "${song.artist}\n${song.genre}",
-                                      style: TextStyle(color: Colors.grey.shade700),
-                                    ),
-                                    isThreeLine: true,
-                                    trailing: Icon(
-                                      Icons.play_circle_fill,
-                                      size: screenWidth * 0.09,
-                                      color: Colors.blue.shade400,
-                                    ),
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => SongDetailScreen(
-                                            song: song,
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(20),
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => SongDetailScreen(song: song),
+                                            ),
+                                          );
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(14),
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                width: 52,
+                                                height: 52,
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    colors: [
+                                                      theme.colorScheme.primary.withOpacity(0.9),
+                                                      theme.colorScheme.secondary.withOpacity(0.8),
+                                                    ],
+                                                  ),
+                                                  borderRadius: BorderRadius.circular(16),
+                                                ),
+                                                child: const Icon(Icons.music_note_rounded, color: Colors.white),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      song.title,
+                                                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                                                    ),
+                                                    const SizedBox(height: 4),
+                                                    Text(
+                                                      "${song.artist} • ${song.genre}",
+                                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                                        color: mutedText,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Icon(
+                                                Icons.play_circle_fill_rounded,
+                                                size: 34,
+                                                color: theme.colorScheme.primary,
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                      );
-                                    },
-                                  ),
-                                );
-                              },
-                            ),
-                    ),
-                  ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
             Positioned(
-              top: MediaQuery.of(context).padding.top,
+              top: MediaQuery.of(context).padding.top + 6,
               left: 8,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => Navigator.of(context).pop(),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withOpacity(0.12) : Colors.white.withOpacity(0.16),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: isDark ? Colors.white.withOpacity(0.08) : Colors.transparent),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
               ),
             ),
           ],

@@ -39,13 +39,55 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'EmoTune',
           theme: ThemeData(
-            brightness: Brightness.light,
-            primarySwatch: Colors.blue,
-            scaffoldBackgroundColor: Colors.white,
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF4F46E5),
+              brightness: Brightness.light,
+            ),
+            scaffoldBackgroundColor: const Color(0xFFF7F8FC),
+            cardTheme: CardThemeData(
+              elevation: 0,
+              margin: EdgeInsets.zero,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.transparent,
+              foregroundColor: Color(0xFF111827),
+              elevation: 0,
+              centerTitle: true,
+            ),
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+            chipTheme: ChipThemeData(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(999),
+              ),
+              side: BorderSide.none,
+            ),
           ),
           darkTheme: ThemeData(
-            brightness: Brightness.dark,
-            primarySwatch: Colors.blue,
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF4F46E5),
+              brightness: Brightness.dark,
+            ),
+            scaffoldBackgroundColor: const Color(0xFF0F172A),
+            cardTheme: CardThemeData(
+              elevation: 0,
+              margin: EdgeInsets.zero,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
           ),
           themeMode: themeProvider.themeMode,
           home: const SplashScreen(),
@@ -335,6 +377,247 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Widget _buildHeaderCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.primary.withOpacity(0.95),
+            Theme.of(context).colorScheme.secondary.withOpacity(0.9),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.18),
+            blurRadius: 20,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 12),
+                Text(
+                  "Find the soundtrack for your moment",
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  "Capture your mood, pick a feeling, or browse instantly for the perfect playlist.",
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withOpacity(0.92),
+                        height: 1.4,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.18),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Icon(
+              Icons.music_note_rounded,
+              size: 34,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImageCaptureSection() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildActionCard(
+            icon: Icons.camera_alt_rounded,
+            title: "Camera",
+            subtitle: "Take a photo",
+            color: Theme.of(context).colorScheme.primary,
+            onTap: captureImage,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildActionCard(
+            icon: Icons.photo_library_rounded,
+            title: "Gallery",
+            subtitle: "Upload photo",
+            color: Theme.of(context).colorScheme.secondary,
+            onTap: pickImage,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmotionSelector() {
+    final emotions = ["Happy", "Sad", "Angry", "Fear", "Neutral", "Surprise", "Disgust"];
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Choose a mood",
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: emotions.map((emotion) {
+              final emotionColor = _getEmotionColor(emotion);
+              final emotionIcon = _getEmotionIcon(emotion);
+              final isSelected = selectedEmotion == emotion;
+
+              return ChoiceChip(
+                label: Text(emotion),
+                avatar: Icon(emotionIcon, size: 18, color: emotionColor),
+                selected: isSelected,
+                selectedColor: emotionColor.withOpacity(0.14),
+                onSelected: (_) => updateRecommendation(emotion),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                side: BorderSide(color: emotionColor.withOpacity(0.25)),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImagePreview() {
+    if (selectedImage == null) return const SizedBox.shrink();
+
+    final statusColor = _getEmotionColor(detectedEmotion);
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: Image.file(
+              selectedImage!,
+              height: MediaQuery.of(context).size.height * 0.24,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.auto_awesome_rounded, color: statusColor, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  isAnalyzing ? "Analyzing your mood..." : "Mood detected: $detectedEmotion",
+                  style: TextStyle(
+                    color: statusColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (isAnalyzing)
+            const SizedBox(
+              width: double.infinity,
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else
+            Column(
+              children: [
+                Text(
+                  detectedEmotion == "No Emotion" || detectedEmotion == "No Face"
+                      ? "We couldn’t detect a clear mood yet. Try another photo or choose manually."
+                      : "Your selected mood is ready. Tap below to explore songs.",
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 12),
+                if (detectedEmotion != "No Emotion" && detectedEmotion != "No Face")
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.music_note_rounded),
+                    onPressed: () {
+                      final recommendedSongs = RecommendationEngine.recommendSongs(
+                        detectedEmotion,
+                        allSongs,
+                      );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SongsListScreen(
+                            recommendedSongs: recommendedSongs,
+                            emotion: detectedEmotion,
+                          ),
+                        ),
+                      );
+                    },
+                    label: const Text("Discover songs"),
+                  ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildActionCard({
     required IconData icon,
     required String title,
@@ -342,49 +625,65 @@ class _HomeScreenState extends State<HomeScreen> {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Ink(
-          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [color.withOpacity(0.7), color],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: color.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        gradient: LinearGradient(
+          colors: [color.withOpacity(0.9), color],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.18),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
           ),
-          child: Column(
-            children: [
-              Icon(icon, size: 48, color: Colors.white),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(22),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.18),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(icon, size: 28, color: Colors.white),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
-                  fontSize: 12,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.9),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -396,300 +695,120 @@ class _HomeScreenState extends State<HomeScreen> {
   // =========================
 
   @override
-  Widget build(
-      BuildContext context) {
-
+  Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
-        title: const Text(
-          "EmoTune",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue.shade800, Colors.blue.shade400],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        title: const Text("EmoTune"),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 12),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.asset(
+              'assets/app icon/logo no bg.png',
+              width: 36,
+              height: 36,
+              fit: BoxFit.contain,
             ),
           ),
         ),
-      ),
-
-      bottomNavigationBar:
-      BottomNavigationBar(
-
-        type: BottomNavigationBarType.fixed,
-
-        currentIndex: 0,
-
-        items: const [
-
-          BottomNavigationBarItem(
-
-            icon: Icon(
-              Icons.home,
-            ),
-
-            label: "Home",
-          ),
-
-          BottomNavigationBarItem(
-
-            icon: Icon(
-              Icons.search,
-            ),
-
-            label: "Search",
-          ),
-
-          BottomNavigationBarItem(
-
-            icon: Icon(
-              Icons.settings,
-            ),
-
-            label: "Settings",
-          ),
-        ],
-
-        onTap:
-            (index) {
-
-          if (index == 0) {
-            // Refresh the page
-            setState(
-              () {
-                isLoading = true;
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
                 selectedImage = null;
                 detectedEmotion = "No Emotion";
                 selectedEmotion = null;
-              },
-            );
-            loadSongs();
-          }
-          else if (index == 1) {
-
-            Navigator.push(
-
-              context,
-
-              MaterialPageRoute(
-
-                builder:
-                    (_) =>
-                    const SearchSongScreen(),
-              ),
-            );
-              } else if (index == 2) {
-
-                Navigator.push(
-
-                  context,
-
-                  MaterialPageRoute(
-                    builder: (_) => const SettingsScreen(),
-                  ),
-                );
-          }
-        },
+                isAnalyzing = false;
+              });
+            },
+            icon: const Icon(Icons.refresh_rounded),
+          ),
+        ],
       ),
-
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface.withOpacity(0.96),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              currentIndex: 0,
+              backgroundColor: Colors.transparent,
+              selectedItemColor: Theme.of(context).colorScheme.primary,
+              unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
+              showUnselectedLabels: true,
+              elevation: 0,
+              items: const [
+                BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: "Home"),
+                BottomNavigationBarItem(icon: Icon(Icons.search_rounded), label: "Search"),
+                BottomNavigationBarItem(icon: Icon(Icons.settings_rounded), label: "Settings"),
+              ],
+              onTap: (index) {
+            if (index == 0) {
+              if (selectedImage != null || selectedEmotion != null) {
+                setState(() {
+                  selectedImage = null;
+                  detectedEmotion = "No Emotion";
+                  selectedEmotion = null;
+                });
+              }
+            } else if (index == 1) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SearchSongScreen()),
+              );
+            } else if (index == 2) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
+            }
+          },
+            ),
+          ),
+        ),
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.blue.shade50, Colors.white],
+            colors: [
+              Theme.of(context).colorScheme.primary.withOpacity(0.08),
+              Theme.of(context).colorScheme.surface,
+            ],
           ),
         ),
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 10),
-                    Text(
-                      "How are you feeling today?",
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue.shade900,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    
-                    // =====================
-                    // CAMERA + GALLERY
-                    // =====================
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildActionCard(
-                            icon: Icons.camera_alt,
-                            title: "Camera",
-                            subtitle: "Take a photo",
-                            color: Colors.blue.shade600,
-                            onTap: captureImage,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: _buildActionCard(
-                            icon: Icons.photo_library,
-                            title: "Gallery",
-                            subtitle: "Upload photo",
-                            color: Colors.purple.shade500,
-                            onTap: pickImage,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 30),
-                    
-                    // =====================
-                    // EMOTION BUTTONS
-                    // =====================
-                    const Text(
-                      "Or select your emotion manually",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        "Happy", "Sad", "Angry", "Fear",
-                        "Neutral", "Surprise", "Disgust",
-                      ].map((emotion) {
-                        Color emotionColor = _getEmotionColor(emotion);
-                        return InkWell(
-                          onTap: () => updateRecommendation(emotion),
-                          borderRadius: BorderRadius.circular(25),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            decoration: BoxDecoration(
-                              color: emotionColor.withOpacity(0.1),
-                              border: Border.all(color: emotionColor, width: 1.5),
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(_getEmotionIcon(emotion), size: 20, color: emotionColor),
-                                const SizedBox(width: 8),
-                                Text(
-                                  emotion,
-                                  style: TextStyle(
-                                    color: emotionColor,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 30),
-                    
-                    // =====================
-                    // IMAGE PREVIEW
-                    // =====================
-                    if (selectedImage != null)
-                      Card(
-                        elevation: 4,
-                        shadowColor: Colors.blue.withOpacity(0.2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Column(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.file(
-                                  selectedImage!,
-                                  height: MediaQuery.of(context).size.height * 0.25,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              if (isAnalyzing)
-                                const Column(
-                                  children: [
-                                    CircularProgressIndicator(),
-                                    SizedBox(height: 10),
-                                    Text(
-                                      "Analyzing face...",
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.blue,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              else
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    RichText(
-                                      textAlign: TextAlign.center,
-                                      text: TextSpan(
-                                        style: const TextStyle(fontSize: 16, color: Colors.black),
-                                        children: [
-                                          const TextSpan(text: "Detected Emotion: "),
-                                          TextSpan(
-                                            text: detectedEmotion,
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                              color: _getEmotionColor(detectedEmotion),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    if (detectedEmotion != "No Emotion" && detectedEmotion != "No Face")
-                                      ElevatedButton(
-                                        onPressed: () {
-                                           final recommendedSongs = RecommendationEngine.recommendSongs(
-                                             detectedEmotion,
-                                             allSongs,
-                                           );
-                                           Navigator.push(
-                                             context,
-                                             MaterialPageRoute(
-                                               builder: (_) => SongsListScreen(
-                                                 recommendedSongs: recommendedSongs,
-                                                 emotion: detectedEmotion,
-                                               ),
-                                              ),
-                                           );
-                                        },
-                                        child: const Text("Get Songs"),
-                                      ),
-                                  ],
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                  ],
+        child: SafeArea(
+          child: isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildHeaderCard(),
+                      const SizedBox(height: 18),
+                      _buildImageCaptureSection(),
+                      const SizedBox(height: 18),
+                      _buildEmotionSelector(),
+                      const SizedBox(height: 18),
+                      _buildImagePreview(),
+                    ],
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }
